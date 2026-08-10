@@ -1,4 +1,4 @@
-.PHONY: install dev test lint build evaluate prototype prototype-demo audit-latest audit-baseline init-db import-demo import-latest-private demo-db sync-remote
+.PHONY: install dev test lint build pages evaluate prototype prototype-demo audit-latest audit-baseline init-db import-demo import-latest-private demo-db sync-remote
 
 DEMO_DATABASE_URL=sqlite:///data/demo/public-demo.sqlite
 LATEST_SNAPSHOT?=../其他/飞书校招表最新快照.md
@@ -20,6 +20,10 @@ lint:
 
 build:
 	npm run build
+
+pages: demo-db
+	CJD_ENVIRONMENT=public-demo CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/export_static_demo.py
+	npm run build:pages
 
 evaluate:
 	.venv/bin/python scripts/run_evaluation.py

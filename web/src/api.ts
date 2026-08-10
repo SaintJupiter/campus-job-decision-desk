@@ -431,6 +431,9 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  if (import.meta.env.VITE_STATIC_DEMO === "true") {
+    return staticDemoApi<T>(path, options);
+  }
   const headers = new Headers(options?.headers);
   if (
     options?.body &&
@@ -527,3 +530,4 @@ export function isConfirmedOfficialLink(item: Opportunity): boolean {
     return false;
   }
 }
+import { staticDemoApi } from "./staticDemo";

@@ -6,6 +6,7 @@ __pycache__/
 .env
 node_modules/
 dist/
+dist-pages/
 .coverage
 .coverage.*
 htmlcov/

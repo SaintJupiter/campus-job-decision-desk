@@ -109,23 +109,17 @@ export function ShortlistPage() {
         description="先用证据确认能投，再跟踪待投递、笔试、面试与 Offer；岗位状态变化仍会阻断错误投递。"
         actions={
           <div className="export-actions">
-            <a
-              className="button secondary"
-              href="/api/workspace/shortlist/export?format=csv"
-            >
+            <a className="button secondary" href={shortlistExportHref("csv")}>
               <Download size={15} />
               CSV
             </a>
-            <a
-              className="button secondary"
-              href="/api/workspace/shortlist/export?format=json"
-            >
+            <a className="button secondary" href={shortlistExportHref("json")}>
               <FileJson size={15} />
               JSON
             </a>
             <a
               className="button secondary"
-              href="/api/workspace/shortlist/export?format=markdown"
+              href={shortlistExportHref("markdown")}
             >
               <FileText size={15} />
               Markdown
@@ -367,6 +361,14 @@ export function ShortlistPage() {
       )}
     </>
   );
+}
+
+function shortlistExportHref(format: "csv" | "json" | "markdown") {
+  if (import.meta.env.VITE_STATIC_DEMO === "true") {
+    const extension = format === "markdown" ? "md" : format;
+    return `${import.meta.env.BASE_URL}demo-shortlist.${extension}`;
+  }
+  return `/api/workspace/shortlist/export?format=${format}`;
 }
 
 const APPLICATION_STAGES: Array<{

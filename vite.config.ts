@@ -3,6 +3,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   root: "web",
+  base:
+    process.env.VITE_STATIC_DEMO === "true"
+      ? "/campus-job-decision-desk/"
+      : "/",
   plugins: [react()],
   build: {
     outDir: "../dist",
