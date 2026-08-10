@@ -4580,23 +4580,23 @@ summary:focus-visible {
 .dashboard-workspace
   .dashboard-verify-list
   .opportunity-card:nth-child(4n + 1) {
-  background: #eee7ff;
+  background: var(--violet-soft);
 }
 
 .dashboard-workspace
   .dashboard-verify-list
   .opportunity-card:nth-child(4n + 2) {
-  background: #e7f7f4;
+  background: var(--mint);
 }
 
 .dashboard-workspace
   .dashboard-verify-list
   .opportunity-card:nth-child(4n + 3) {
-  background: #fff0eb;
+  background: var(--cyan);
 }
 
 .dashboard-workspace .dashboard-verify-list .opportunity-card:nth-child(4n) {
-  background: #e8f4fb;
+  background: var(--coral);
 }
 
 .dashboard-workspace .dashboard-verify-list .opportunity-card:hover {
@@ -5170,16 +5170,16 @@ summary:focus-visible {
 }
 
 .about-capability-card.tone-violet {
-  background: #eee7ff;
+  background: var(--violet-soft);
 }
 .about-capability-card.tone-mint {
-  background: #e7f7f4;
+  background: var(--mint);
 }
 .about-capability-card.tone-coral {
-  background: #fff0eb;
+  background: var(--coral);
 }
 .about-capability-card.tone-cyan {
-  background: #e8f4fb;
+  background: var(--cyan);
 }
 
 .about-difference-panel {

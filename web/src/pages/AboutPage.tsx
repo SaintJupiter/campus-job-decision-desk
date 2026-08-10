@@ -31,14 +31,14 @@ const capabilities = [
     icon: GitCompareArrows,
     title: "保留字段来源与冲突",
     copy: "公司、岗位、城市、届次、截止时间和链接分别记录来源；冲突显式展示，历史值完整保留。",
-    tone: "coral",
+    tone: "cyan",
   },
   {
     index: "04",
     icon: SearchCheck,
     title: "聚焦高价值官网核验",
     copy: "分别判断可投性、经历证据和信息可信度，优先核验最可能改变投递结论的岗位。",
-    tone: "cyan",
+    tone: "coral",
   },
 ];
 
