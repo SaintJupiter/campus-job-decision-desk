@@ -2,11 +2,11 @@
 
 把多份校招岗位表整理成一份**能解释、能核验、能安全导出的投递清单**。系统不会用一个看似精确的“匹配度”替代判断，而是先确认岗位到底是什么、信息来自哪里、现在是否仍可投，再结合简历中已经确认的经历证据给出行动建议。
 
-## [在本机运行完整产品 →](#快速开始)
+## [打开在线产品演示 →](https://saintjupiter.github.io/campus-job-decision-desk/)
 
-[了解工作流](#从岗位线索到投递行动) · [使用自己的简历与岗位表](#使用自己的简历与岗位表) · [阅读产品案例](docs/PRODUCT_CASE_STUDY.md) · [查看评测边界](docs/evaluation/report.html)
+[在本机运行完整版](#快速开始) · [了解工作流](#从岗位线索到投递行动) · [使用自己的简历与岗位表](#使用自己的简历与岗位表) · [阅读产品案例](docs/PRODUCT_CASE_STUDY.md)
 
-> 仓库内置两份合成岗位表和两版“小刘”虚构简历。首次启动即可体验导入、拆分、核验、三轴决策与投递计划，不会打开一个空白后台，也不包含真实个人信息或付费岗位表原文。
+> 在线版直接在浏览器中读取预生成的合成数据，可体验岗位筛选、证据详情、虚构简历画像、三轴决策、短名单与评测结果。真实简历上传、飞书同步和重新计算保留在本地完整版中，避免在公开网站收集个人信息。
 
 ## 快速开始
 
@@ -160,7 +160,19 @@ npm run build
 make evaluate
 ```
 
-## 部署公开只读演示
+## 更新在线演示
+
+静态演示使用与完整版相同的 React 页面和数据结构。构建时从合成 SQLite 工作区导出岗位、画像、证据和决策结果，再由 GitHub Pages 直接提供，不依赖持续运行的 Python 服务。
+
+```bash
+make pages
+```
+
+命令会重建纯合成演示库、生成 `web/public/demo-data.json` 和三种短名单示例，并输出到 `dist-pages/`。当前线上版本发布在 `gh-pages` 分支：
+
+[https://saintjupiter.github.io/campus-job-decision-desk/](https://saintjupiter.github.io/campus-job-decision-desk/)
+
+## 部署完整前后端
 
 仓库包含 `Dockerfile` 与 `render.yaml`。部署镜像只复制合成数据，并在构建时重建带内容封印的只读演示库；`data/private`、个人简历、环境变量和所有 SQLite 工作库都不会进入镜像。
 
@@ -169,7 +181,7 @@ docker build -t campus-job-desk .
 docker run --rm -p 8000:8000 campus-job-desk
 ```
 
-访问 `http://127.0.0.1:8000/about`。推送 GitHub 后也可用 `render.yaml` 创建公开只读演示，再把正式网址放到本 README 首行。
+访问 `http://127.0.0.1:8000/about`。若需要让公开网站真正执行简历解析、来源导入或同步，还需要部署该完整后端，并在开放写入前补充账号、用户隔离、存储和删除机制。
 
 ## 技术架构
 
