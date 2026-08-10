@@ -28,6 +28,7 @@ RUN pip install --no-cache-dir . \
     && python scripts/init_db.py \
     && python scripts/import_source.py data/demo/source_alpha.csv --source-id demo-alpha --source-name '合成供应商甲' --independence-group demo-alpha --source-kind SYNTHETIC \
     && python scripts/import_source.py data/demo/source_beta.tsv --source-id demo-beta --source-name '合成供应商乙' --independence-group demo-beta --source-kind SYNTHETIC \
+    && python scripts/import_source.py data/demo/source_showcase.csv --source-id demo-showcase --source-name '合成展示扩展集' --independence-group demo-showcase --source-kind SYNTHETIC \
     && python scripts/seed_demo.py --attest-fresh-reset
 
 EXPOSE 8000

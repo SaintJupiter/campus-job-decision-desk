@@ -46,6 +46,7 @@ init-db:
 import-demo: init-db
 	.venv/bin/python scripts/import_source.py data/demo/source_alpha.csv --source-id demo-alpha --source-name '合成供应商甲' --independence-group demo-alpha --source-kind SYNTHETIC
 	.venv/bin/python scripts/import_source.py data/demo/source_beta.tsv --source-id demo-beta --source-name '合成供应商乙' --independence-group demo-beta --source-kind SYNTHETIC
+	.venv/bin/python scripts/import_source.py data/demo/source_showcase.csv --source-id demo-showcase --source-name '合成展示扩展集' --independence-group demo-showcase --source-kind SYNTHETIC
 
 import-latest-private: init-db
 	.venv/bin/python scripts/import_source.py '$(LATEST_SNAPSHOT)' --source-id private-list-27-01 --source-name '本地授权校招表' --independence-group private-list-27-01 --source-kind PAID_TABLE
@@ -55,6 +56,7 @@ demo-db:
 	CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/init_db.py
 	CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/import_source.py data/demo/source_alpha.csv --source-id demo-alpha --source-name '合成供应商甲' --independence-group demo-alpha --source-kind SYNTHETIC
 	CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/import_source.py data/demo/source_beta.tsv --source-id demo-beta --source-name '合成供应商乙' --independence-group demo-beta --source-kind SYNTHETIC
+	CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/import_source.py data/demo/source_showcase.csv --source-id demo-showcase --source-name '合成展示扩展集' --independence-group demo-showcase --source-kind SYNTHETIC
 	CJD_DATABASE_URL=$(DEMO_DATABASE_URL) .venv/bin/python scripts/seed_demo.py --attest-fresh-reset
 
 sync-remote:

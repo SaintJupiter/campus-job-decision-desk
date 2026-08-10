@@ -55,6 +55,12 @@ export function AboutPage() {
           <p className="about-lead">
             系统面向国内校招多源信息不一致的问题，将招聘项目、具体岗位、字段来源和官网状态分层处理，再生成可追溯的投递建议。
           </p>
+          <div className="about-demo-context" role="note">
+            <strong>当前页面是在线展示版</strong>
+            <span>
+              页面使用预置合成岗位和虚构简历，便于直接体验完整流程；真实使用时，岗位池、证据匹配和推荐顺序会根据用户自己的岗位来源、简历画像与核验结果动态生成。
+            </span>
+          </div>
           <div className="about-actions">
             <NavLink className="button primary" to="/">
               开始规划投递 <ArrowRight size={18} />

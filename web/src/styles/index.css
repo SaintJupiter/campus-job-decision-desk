@@ -4929,6 +4929,29 @@ summary:focus-visible {
   line-height: 1.75;
 }
 
+.about-demo-context {
+  display: grid;
+  gap: 5px;
+  max-width: 720px;
+  margin-top: 20px;
+  padding: 15px 18px;
+  border: 1.5px solid var(--ink);
+  border-left: 7px solid var(--violet);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 72%);
+  box-shadow: 4px 4px 0 rgb(25 20 38 / 10%);
+}
+
+.about-demo-context strong {
+  font-size: 15px;
+}
+
+.about-demo-context span {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
 .about-actions {
   display: flex;
   flex-wrap: wrap;

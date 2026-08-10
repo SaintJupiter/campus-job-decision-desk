@@ -202,7 +202,7 @@ export function AppShell({
           <div className="readonly-banner" role="status">
             <Info size={16} />
             <span>
-              岗位方向参考公开秋招线索；单位、链接和核验状态为脱敏合成演示，不代表真实在招。
+              当前为在线展示版：使用预置的合成岗位与虚构画像；真实使用时会根据用户导入的岗位来源和已确认简历画像动态生成筛选、三轴结论与推荐。
             </span>
           </div>
         )}
