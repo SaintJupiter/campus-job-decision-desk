@@ -215,7 +215,7 @@ describe("App", () => {
     expect(screen.getByText(/可追溯的投递判断/u)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "开始规划投递" })).toHaveAttribute(
       "href",
-      "/",
+      "/dashboard",
     );
   });
 

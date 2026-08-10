@@ -62,7 +62,7 @@ export function AboutPage() {
             </span>
           </div>
           <div className="about-actions">
-            <NavLink className="button primary" to="/">
+            <NavLink className="button primary" to="/dashboard">
               开始规划投递 <ArrowRight size={18} />
             </NavLink>
             <NavLink className="button secondary" to="/evidence">

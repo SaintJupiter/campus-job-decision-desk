@@ -36,9 +36,12 @@ import type {
 } from "./api";
 import { humanDate, isConfirmedOfficialLink } from "./api";
 
+const staticDemo = import.meta.env.VITE_STATIC_DEMO === "true";
+const homePath = staticDemo ? "/about" : "/";
+
 const navItems = [
   { to: "/about", label: "产品介绍", icon: BookOpenText },
-  { to: "/", label: "今日决策", icon: ListChecks, end: true },
+  { to: "/dashboard", label: "今日决策", icon: ListChecks },
   { to: "/jobs", label: "岗位工作区", icon: BriefcaseBusiness },
   { to: "/shortlist", label: "投递计划", icon: FolderKanban },
   { to: "/evidence", label: "评测结果", icon: ChartNoAxesCombined },
@@ -110,7 +113,11 @@ export function AppShell({
         />
       )}
       <header className="global-header">
-        <NavLink className="brand" to="/" aria-label="校招岗位决策台首页">
+        <NavLink
+          className="brand"
+          to={homePath}
+          aria-label="校招岗位决策台首页"
+        >
           <div className="brand-mark" aria-hidden="true">
             <ShieldCheck size={20} strokeWidth={2.2} />
           </div>
@@ -134,11 +141,10 @@ export function AppShell({
             <X size={19} />
           </button>
           <div className="nav-list">
-            {navItems.map(({ to, label, icon: Icon, end }) => (
+            {navItems.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
-                end={end}
                 onClick={() => mobileNavOpen && closeMobileNavigation()}
                 className={({ isActive }) =>
                   clsx("nav-item", isActive && "is-active")

@@ -17,6 +17,7 @@ import { defaultRuntime } from "./runtime";
 import { useRemote } from "./useRemote";
 
 export function App() {
+  const staticDemo = import.meta.env.VITE_STATIC_DEMO === "true";
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const runtime = useRemote(() => api<RuntimeMeta>("/api/meta"));
@@ -36,14 +37,23 @@ export function App() {
       >
         <Routes>
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/"
+            element={
+              staticDemo ? <Navigate to="/about" replace /> : <DashboardPage />
+            }
+          />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/jobs/:id" element={<JobDetailPage />} />
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/sources" element={<SourcesPage />} />
           <Route path="/shortlist" element={<ShortlistPage />} />
           <Route path="/evidence" element={<EvidencePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="*"
+            element={<Navigate to={staticDemo ? "/about" : "/"} replace />}
+          />
         </Routes>
         {profileOpen && <ProfileDrawer onClose={() => setProfileOpen(false)} />}
       </AppShell>
