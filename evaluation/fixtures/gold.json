@@ -1,0 +1,456 @@
+{
+  "schema_version": "campus-job-desk-evaluation-fixtures.v1",
+  "provenance": {
+    "author": "project developer",
+    "data_class": "fully synthetic",
+    "created_for": "repeatable regression and heuristic evaluation",
+    "limitations": [
+      "These fixtures are not sampled from applicants, employers, interviews, or production traffic.",
+      "Contract cases test declared safety boundaries; heuristic samples only measure this small developer-authored set.",
+      "No result may be presented as a user-study, hiring-outcome, or real-world accuracy claim."
+    ]
+  },
+  "contract_boundary": {
+    "classification": [
+      {
+        "id": "contract.classification.broad_campaign",
+        "record": {
+          "company": "星海智能",
+          "title": "产品类、算法类、运营类，岗位详见官网",
+          "cities": ["上海", "杭州", "深圳"],
+          "graduation_years": ["2027届"],
+          "apply_url": "https://careers.synthetic.example/campus"
+        },
+        "expected_kind": "CAMPAIGN"
+      },
+      {
+        "id": "contract.classification.official_posting",
+        "record": {
+          "company": "星海智能",
+          "title": "AI产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "official_job_id": "PM1001",
+          "apply_url": "https://careers.synthetic.example/jobs/PM1001"
+        },
+        "expected_kind": "POSTING"
+      },
+      {
+        "id": "contract.classification.direct_posting",
+        "record": {
+          "company": "浦江计算",
+          "title": "数据产品实习生",
+          "cities": ["上海"],
+          "apply_url": "https://jobs.synthetic.example/position/DATA-2048"
+        },
+        "expected_kind": "POSTING"
+      }
+    ],
+    "deduplication": [
+      {
+        "id": "contract.dedup.official_id_conflict",
+        "current": {
+          "company": "浦江计算",
+          "title": "数据产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "秋招",
+          "official_job_id": "JOB-NEW"
+        },
+        "other": {
+          "title": "数据产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "秋招",
+          "official_job_id": "JOB-OLD"
+        },
+        "same_compound_hint": false,
+        "expected_decision": "SEPARATE"
+      },
+      {
+        "id": "contract.dedup.compound_hint_never_merges",
+        "current": {
+          "company": "浦江计算",
+          "title": "AI产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "秋招"
+        },
+        "other": {
+          "title": "AI产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "秋招"
+        },
+        "same_compound_hint": true,
+        "expected_decision": "REVIEW"
+      }
+    ],
+    "decision_guardrails": [
+      {
+        "id": "contract.decision.verified_specific_posting",
+        "profile": {
+          "resume_text": "2027届硕士\n负责 AI 产品需求分析\n使用 Python 完成数据分析\n参与数据平台方案设计",
+          "confirm_all": true,
+          "accepted_cities": ["上海"],
+          "accepted_recruitment_types": ["秋招"]
+        },
+        "context": {
+          "record": {
+            "company": "星海智能",
+            "title": "AI产品经理",
+            "cities": ["上海"],
+            "graduation_years": ["2027届"],
+            "education": ["本科及以上"],
+            "recruitment_type": "秋招"
+          },
+          "opportunity_kind": "POSTING",
+          "verification_result": "OPEN",
+          "source_count": 2,
+          "official_specific_posting": true,
+          "official_checked_at": "2026-08-10T00:00:00+00:00",
+          "latest_source_at": "2026-08-10T00:00:00+00:00",
+          "jd_text": "负责 AI 产品和数据平台的需求分析"
+        },
+        "as_of": "2026-08-10T00:00:00+00:00",
+        "expected": {
+          "eligibility": "PASS",
+          "evidence_fit": "PRIMARY",
+          "trust": "VERIFIED"
+        }
+      },
+      {
+        "id": "contract.decision.campaign_not_eligible",
+        "profile": {
+          "resume_text": "2027届硕士\nAI 产品需求分析",
+          "confirm_all": true,
+          "accepted_cities": ["上海"],
+          "accepted_recruitment_types": ["秋招"]
+        },
+        "context": {
+          "record": {
+            "company": "星海智能",
+            "title": "2027校园招聘",
+            "cities": ["上海"],
+            "graduation_years": ["2027届"],
+            "education": ["本科及以上"],
+            "recruitment_type": "秋招"
+          },
+          "opportunity_kind": "CAMPAIGN",
+          "verification_result": "OPEN",
+          "source_count": 2,
+          "official_specific_posting": false,
+          "official_checked_at": "2026-08-10T00:00:00+00:00",
+          "latest_source_at": "2026-08-10T00:00:00+00:00",
+          "jd_text": "AI 产品方向"
+        },
+        "as_of": "2026-08-10T00:00:00+00:00",
+        "expected": {
+          "eligibility": "UNKNOWN",
+          "trust": "CONSISTENT"
+        }
+      },
+      {
+        "id": "contract.decision.blocked_is_not_closed",
+        "profile": {
+          "resume_text": "2027届硕士\nAI 产品需求分析",
+          "confirm_all": true,
+          "accepted_cities": ["上海"],
+          "accepted_recruitment_types": ["秋招"]
+        },
+        "context": {
+          "record": {
+            "company": "星海智能",
+            "title": "AI产品经理",
+            "cities": ["上海"],
+            "graduation_years": ["2027届"],
+            "education": ["本科及以上"],
+            "recruitment_type": "秋招"
+          },
+          "opportunity_kind": "POSTING",
+          "verification_result": "BLOCKED",
+          "source_count": 1,
+          "official_specific_posting": false,
+          "latest_source_at": "2026-08-10T00:00:00+00:00",
+          "jd_text": "AI 产品需求分析"
+        },
+        "as_of": "2026-08-10T00:00:00+00:00",
+        "expected": {
+          "eligibility": "UNKNOWN",
+          "trust": "UNKNOWN"
+        }
+      },
+      {
+        "id": "contract.decision.stale_official_evidence",
+        "profile": {
+          "resume_text": "2027届硕士\nAI 产品需求分析",
+          "confirm_all": true,
+          "accepted_cities": ["上海"],
+          "accepted_recruitment_types": ["秋招"]
+        },
+        "context": {
+          "record": {
+            "company": "星海智能",
+            "title": "AI产品经理",
+            "cities": ["上海"],
+            "graduation_years": ["2027届"],
+            "education": ["本科及以上"],
+            "recruitment_type": "秋招"
+          },
+          "opportunity_kind": "POSTING",
+          "verification_result": "OPEN",
+          "source_count": 2,
+          "official_specific_posting": true,
+          "official_checked_at": "2026-07-20T00:00:00+00:00",
+          "latest_source_at": "2026-07-20T00:00:00+00:00",
+          "jd_text": "AI 产品需求分析"
+        },
+        "as_of": "2026-08-10T00:00:00+00:00",
+        "expected": {
+          "trust": "STALE"
+        }
+      },
+      {
+        "id": "contract.decision.unconfirmed_resume_gets_no_credit",
+        "profile": {
+          "resume_text": "2027届硕士\nAI 产品需求分析",
+          "confirm_all": false,
+          "accepted_cities": ["上海"],
+          "accepted_recruitment_types": ["秋招"]
+        },
+        "context": {
+          "record": {
+            "company": "星海智能",
+            "title": "AI产品经理",
+            "cities": ["上海"],
+            "graduation_years": ["2027届"],
+            "education": ["本科及以上"],
+            "recruitment_type": "秋招"
+          },
+          "opportunity_kind": "POSTING",
+          "verification_result": "OPEN",
+          "source_count": 2,
+          "official_specific_posting": true,
+          "official_checked_at": "2026-08-10T00:00:00+00:00",
+          "latest_source_at": "2026-08-10T00:00:00+00:00",
+          "jd_text": "AI 产品需求分析"
+        },
+        "as_of": "2026-08-10T00:00:00+00:00",
+        "expected": {
+          "evidence_fit": "UNKNOWN"
+        }
+      }
+    ],
+    "verification_guardrails": [
+      {
+        "id": "contract.verification.accept_company_domain",
+        "operation": "normalize_domain",
+        "candidate": "jobs.synthetic-example.com",
+        "expected": "jobs.synthetic-example.com"
+      },
+      {
+        "id": "contract.verification.reject_aggregator",
+        "operation": "normalize_domain",
+        "candidate": "jobs.nowcoder.com",
+        "expected_error": "聚合平台域名不能确认为公司官方招聘域名"
+      },
+      {
+        "id": "contract.verification.reject_public_suffix",
+        "operation": "normalize_domain",
+        "candidate": "com.cn",
+        "expected_error": "公共后缀或单标签不能作为官方招聘域名"
+      },
+      {
+        "id": "contract.verification.reject_ip_address",
+        "operation": "normalize_domain",
+        "candidate": "127.0.0.1",
+        "expected_error": "IP 地址不能作为官方招聘域名"
+      },
+    {
+      "id": "contract.verification.shared_ats_requires_tenant",
+        "operation": "normalize_scope",
+        "candidate": "job-boards.greenhouse.io",
+      "expected_error": "共享 ATS 域名必须提供包含公司租户路径的招聘页面 URL"
+    },
+    {
+      "id": "contract.verification.reject_workday_parent_domain",
+      "operation": "normalize_scope",
+      "candidate": "myworkdayjobs.com",
+      "expected_error": "共享 ATS 父域不能作为单家公司官网；请提供包含公司租户的招聘页面 URL"
+    },
+    {
+      "id": "contract.verification.reject_workday_infrastructure_domain",
+      "operation": "normalize_scope",
+      "candidate": "wd5.myworkdayjobs.com",
+      "expected_error": "共享 ATS 父域不能作为单家公司官网；请提供包含公司租户的招聘页面 URL"
+    },
+      {
+        "id": "contract.verification.shared_ats_keeps_tenant_scope",
+        "operation": "normalize_scope",
+        "candidate": "https://job-boards.greenhouse.io/company-a/jobs",
+        "expected": {
+          "domain": "job-boards.greenhouse.io",
+          "scope_path": "/company-a"
+        }
+      },
+      {
+        "id": "contract.verification.job_id_matches_direct_path",
+        "operation": "official_job_id_match",
+        "candidate": "https://jobs.synthetic-example.com/jobs/PM-1001",
+        "official_job_id": "PM-1001",
+        "expected": true
+      },
+      {
+        "id": "contract.verification.article_id_is_not_job_identity",
+        "operation": "official_job_id_match",
+        "candidate": "https://jobs.synthetic-example.com/news/PM-1001",
+        "official_job_id": "PM-1001",
+        "expected": false
+      },
+      {
+        "id": "contract.verification.graduation_year_is_not_job_identity",
+        "operation": "official_job_id_match",
+        "candidate": "https://jobs.synthetic-example.com/jobs/2027",
+        "official_job_id": "2027",
+        "expected": false
+      },
+      {
+        "id": "contract.verification.campaign_token_is_not_job_identity",
+        "operation": "official_job_id_match",
+        "candidate": "https://jobs.synthetic-example.com/jobs/campus-2027",
+        "official_job_id": "campus-2027",
+        "expected": false
+      },
+      {
+        "id": "contract.verification.unresolved_page_cannot_write_claims",
+        "operation": "record_verification",
+        "result": "NOT_FOUND",
+        "candidate": "https://jobs.synthetic-example.com/jobs/PM-1001",
+        "evidence_excerpt": "页面未找到",
+        "extracted_fields": {"cities": ["上海"]},
+        "expected_error": "页面未找到、访问受阻或未知状态不能写入官网字段 claim"
+      },
+      {
+        "id": "contract.verification.open_requires_exact_posting_url",
+        "operation": "record_verification",
+        "result": "OPEN",
+        "candidate": "https://jobs.synthetic-example.com/campus/2027",
+        "evidence_excerpt": "页面显示校园招聘正在接受申请",
+        "extracted_fields": {},
+        "expected_error": "核验页未结构化匹配当前岗位的官方 ID"
+      },
+      {
+        "id": "contract.verification.shared_ats_rejects_other_tenant",
+        "operation": "record_verification",
+        "result": "OPEN",
+        "candidate": "https://job-boards.greenhouse.io/company-b/jobs/PM-1001",
+        "official_domain": "job-boards.greenhouse.io",
+        "official_scope_path": "/company-a",
+        "evidence_excerpt": "页面显示岗位正在接受申请",
+        "extracted_fields": {},
+        "expected_error": "核验链接与岗位官网域名或公司租户路径不匹配"
+      }
+    ]
+  },
+  "heuristic_samples": {
+    "classification": [
+      {
+        "id": "sample.classification.ai_product_intern",
+        "record": {
+          "company": "云川科技",
+          "title": "AI产品实习生",
+          "cities": ["上海"],
+          "apply_url": "https://careers.synthetic.example/jobs/AI-7788"
+        },
+        "expected_kind": "POSTING"
+      },
+      {
+        "id": "sample.classification.graduate_program",
+        "record": {
+          "company": "云川科技",
+          "title": "2027届校园招聘正式启动",
+          "cities": ["上海", "杭州", "苏州"],
+          "announcement_url": "https://careers.synthetic.example/campus/2027"
+        },
+        "expected_kind": "CAMPAIGN"
+      },
+      {
+        "id": "sample.classification.solution_role",
+        "record": {
+          "company": "江南机器人",
+          "title": "解决方案工程师",
+          "cities": ["上海"],
+          "official_job_id": "SOL-301",
+          "apply_url": "https://jobs.synthetic.example/position/SOL-301"
+        },
+        "expected_kind": "POSTING"
+      },
+      {
+        "id": "sample.classification.role_families",
+        "record": {
+          "company": "江南机器人",
+          "title": "研发类/产品类/市场类多个岗位",
+          "cities": ["杭州"],
+          "apply_url": "https://jobs.synthetic.example/graduate"
+        },
+        "expected_kind": "CAMPAIGN"
+      },
+      {
+        "id": "sample.classification.data_analyst_without_id",
+        "record": {
+          "company": "东海芯片",
+          "title": "数据分析师",
+          "cities": ["上海"],
+          "apply_url": "https://careers.synthetic.example/openings/data-analyst-27"
+        },
+        "expected_kind": "POSTING"
+      },
+      {
+        "id": "sample.classification.multi_city_campaign",
+        "record": {
+          "company": "东海芯片",
+          "title": "2027届校园招聘",
+          "cities": ["上海", "无锡", "西安", "深圳"],
+          "announcement_url": "https://careers.synthetic.example/students"
+        },
+        "expected_kind": "CAMPAIGN"
+      }
+    ],
+    "deduplication": [
+      {
+        "id": "sample.dedup.near_match_review",
+        "current": {
+          "company": "云川科技",
+          "title": "AI产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "秋招"
+        },
+        "other": {
+          "title": "AI 产品经理",
+          "cities": ["上海"],
+          "graduation_years": ["2027届"],
+          "recruitment_type": "2027秋招"
+        },
+        "same_compound_hint": false,
+        "expected_decision": "REVIEW"
+      },
+      {
+        "id": "sample.dedup.distinct_official_posts",
+        "current": {
+          "company": "江南机器人",
+          "title": "解决方案工程师",
+          "cities": ["上海"],
+          "official_job_id": "SOL-101"
+        },
+        "other": {
+          "title": "解决方案工程师",
+          "cities": ["上海"],
+          "official_job_id": "SOL-202"
+        },
+        "same_compound_hint": false,
+        "expected_decision": "SEPARATE"
+      }
+    ]
+  }
+}

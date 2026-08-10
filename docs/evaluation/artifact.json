@@ -1,0 +1,395 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "校招岗位决策台评测：边界可复现，效果仍待真实用户验证",
+    "description": "面向产品与招聘科技岗位面试的证据型项目评测报告。",
+    "generatedAt": "2026-08-09T19:53:47.919294Z",
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# 校招岗位决策台评测：边界可复现，效果仍待真实用户验证\n\n工程边界、私有数据结构质量与本地接口性能的可审计快照。"
+      },
+      {
+        "id": "executive-summary",
+        "type": "markdown",
+        "layout": "full",
+        "sourceId": "evaluation-results",
+        "body": "## Executive Summary\n\n- **可以证明：** 25/25 条安全边界用例通过；8/8 条开发者编写的合成启发式样本与预期一致。\n- **可以证明：** 私有基线含 7,919 条原始记录、7,890 个机会实体和 79,648 条字段 Claim；机会实体来源覆盖率为 100%。\n- **不能证明：** 这些结果不是用户实验、线上准确率、投递转化率或录用率证据。当前最重要的下一步，是用同一任务比较原表手筛与系统的 time-to-5、误资格数和官网确认数。"
+      },
+      {
+        "id": "headline-metrics",
+        "type": "metric-strip",
+        "layout": "full",
+        "cardIds": [
+          "contract-cases",
+          "heuristic-cases",
+          "raw-records",
+          "origin-coverage"
+        ]
+      },
+      {
+        "id": "finding-boundaries",
+        "type": "markdown",
+        "layout": "full",
+        "sourceId": "evaluation-results",
+        "body": "## 关键边界已经变成可重复执行的契约\n\n系统不是用一个不可解释的匹配分数证明自己，而是把 Campaign/Posting 隔离、官网域名与共享 ATS 租户约束、岗位 ID 绑定、页面失败状态、简历证据确认和去重边界写成回归用例。图中的 100% 只表示当前声明的合成契约全部通过，不应外推到未知招聘网站或真实用户。"
+      },
+      {
+        "id": "quality-gates-chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "quality-gates"
+      },
+      {
+        "id": "finding-private-baseline",
+        "type": "markdown",
+        "layout": "full",
+        "sourceId": "evaluation-results",
+        "body": "## 私有基线证明了规模与审计链，没有证明每条语义都正确\n\n7,919 条原始记录中，7,910 条完整解析、7 条部分解析、2 条拒绝；7,909 条记录被物化并保留来源关系。所有 7,890 个机会实体都能追溯到至少一个 RawRecord，且没有发现多个同时生效的 Selected Claim 组。未物化记录继续保留在原始层，不会被伪造成岗位。"
+      },
+      {
+        "id": "finding-performance",
+        "type": "markdown",
+        "layout": "full",
+        "sourceId": "evaluation-results",
+        "body": "## 本地交互延迟足以支持作品演示，但不是生产 SLO\n\n在同进程 FastAPI TestClient、指定本地数据库和每个端点 5 次测量下，岗位池首屏中位响应 28.46 ms，今日决策汇总 52.92 ms，岗位证据详情 3.35 ms。该环境没有网络、并发和线上基础设施开销。"
+      },
+      {
+        "id": "api-table-block",
+        "type": "table",
+        "layout": "full",
+        "tableId": "api-performance"
+      },
+      {
+        "id": "recommended-next-steps",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Recommended Next Steps\n\n1. 邀请至少 3 名同学完成同一项 15 分钟任务：找出 5 个上海、2027 届、值得投且能追溯官网证据的岗位。\n2. 对同一候选集做原表手筛与系统对照，记录 time-to-5、官网确认数、明确误资格数、查看数与人工纠错。\n3. 只修复用户测试中影响最大的一个 Bad Case，再重跑契约、结构质量与任务流程。\n4. 结果不足时如实降级为“个人数据产品原型”，不包装成已经验证的推荐产品。"
+      },
+      {
+        "id": "further-questions",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Further Questions\n\n- 用户真正节省的是筛选时间，还是官网核验时间？\n- Campaign 被隔离后，会减少误资格，还是会增加用户认为的遗漏？\n- 对不同简历背景，Eligibility 的 Unknown 比例是否过高？\n- 哪些来源字段最常产生影响投递的冲突，值得优先做适配器？"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "layout": "full",
+        "sourceId": "evaluation-results",
+        "body": "## Caveats and Assumptions\n\n- Gold fixtures 全部由开发者合成，不来自申请者、企业、面试或生产流量。\n- 8 条启发式样本只用于小型回归，不能称为真实推荐准确率。\n- 私有数据库只输出聚合计数与比率，不输出公司、岗位、链接、简历或付费来源原文。\n- 数据质量指标衡量结构完整性，不保证每行语义正确。\n- API 延迟是本地进程观测，不是线上服务等级承诺。"
+      }
+    ],
+    "cards": [
+      {
+        "id": "contract-cases",
+        "dataset": "headline",
+        "description": "必须全部通过的安全边界与状态机契约。",
+        "sourceId": "evaluation-results",
+        "metrics": [
+          {
+            "field": "contract_passed",
+            "label": "安全边界通过",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "heuristic-cases",
+        "dataset": "headline",
+        "description": "开发者编写的小型合成样本，只用于防回归。",
+        "sourceId": "evaluation-results",
+        "metrics": [
+          {
+            "field": "heuristic_passed",
+            "label": "合成样本通过",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "raw-records",
+        "dataset": "headline",
+        "description": "私有基线中的不可变原始记录总数。",
+        "sourceId": "evaluation-results",
+        "metrics": [
+          {
+            "field": "raw_records",
+            "label": "原始记录",
+            "format": "compact"
+          }
+        ]
+      },
+      {
+        "id": "origin-coverage",
+        "dataset": "headline",
+        "description": "至少链接到一个原始来源的机会实体占比。",
+        "sourceId": "evaluation-results",
+        "metrics": [
+          {
+            "field": "origin_coverage",
+            "label": "机会来源覆盖率",
+            "format": "percent"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "quality-gates",
+        "dataset": "quality_gates",
+        "title": "可复现质量门槛通过率",
+        "subtitle": "不同分母分别展示；合成契约与结构覆盖不可互相替代",
+        "type": "bar",
+        "sourceId": "evaluation-results",
+        "encodings": {
+          "x": {
+            "field": "metric",
+            "label": "评测门槛",
+            "type": "nominal"
+          },
+          "y": {
+            "field": "rate",
+            "label": "通过或覆盖率",
+            "type": "quantitative",
+            "format": "percent"
+          }
+        },
+        "settings": {
+          "orientation": "horizontal"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "api-performance",
+        "dataset": "api_performance",
+        "title": "本地接口性能观测",
+        "sourceId": "evaluation-results",
+        "columns": [
+          {
+            "field": "action",
+            "label": "用户动作"
+          },
+          {
+            "field": "http_status",
+            "label": "HTTP"
+          },
+          {
+            "field": "median_ms",
+            "label": "中位延迟 (ms)"
+          },
+          {
+            "field": "p95_ms",
+            "label": "P95 (ms)"
+          },
+          {
+            "field": "sample_count",
+            "label": "样本数"
+          }
+        ],
+        "defaultSort": {
+          "field": "median_ms",
+          "direction": "desc"
+        }
+      }
+    ],
+    "sources": [
+      {
+        "id": "evaluation-results",
+        "label": "可复现评测聚合结果",
+        "path": "evaluation/results/latest.json",
+        "description": "由 evaluation-harness.v1 从合成 fixtures、私有数据库只读副本和本地 API 测量生成；私有数据库仅输出聚合计数与比率，每个 API 端点 1 次预热后测量 5 次。",
+        "query": {
+          "engine": "DuckDB",
+          "language": "sql",
+          "id": "evaluation-results-json-v1",
+          "executed_at": "2026-08-09T19:53:47.919294Z",
+          "sql": "SELECT * FROM read_json_auto('evaluation/results/latest.json');",
+          "description": "读取评测器已经审计并聚合的 JSON 结果；生成过程由 scripts/run_evaluation.py 复现。",
+          "tables_used": [
+            "evaluation/results/latest.json"
+          ],
+          "filters": [
+            "私有数据仅保留聚合计数与比率",
+            "每个 API 端点 1 次预热后测量 5 次"
+          ],
+          "metric_definitions": [
+            "机会来源覆盖率 = 至少有一个 OpportunityOrigin 的机会实体数 / 全部机会实体数",
+            "原始记录物化覆盖率 = 有 OpportunityOrigin 的 RawRecord 数 / 全部 RawRecord 数",
+            "边界通过率 = 实际结果与声明期望完全一致的 contract fixture 数 / contract fixture 总数"
+          ]
+        }
+      },
+      {
+        "id": "fixture-manifest",
+        "label": "合成 Gold Fixture 清单",
+        "path": "evaluation/fixtures/gold.json",
+        "description": "开发者编写并可逐条审阅的合成输入与预期，声明 Campaign/Posting、去重、官网域名、共享 ATS、状态和三轴决策边界；不代表生产样本。",
+        "query": {
+          "engine": "DuckDB",
+          "language": "sql",
+          "id": "gold-fixtures-json-v1",
+          "sql": "SELECT * FROM read_json_auto('evaluation/fixtures/gold.json');",
+          "description": "读取可逐条审阅的合成输入与期望。",
+          "tables_used": [
+            "evaluation/fixtures/gold.json"
+          ],
+          "filters": [
+            "完全合成",
+            "不含真实申请者或企业数据"
+          ],
+          "metric_definitions": [
+            "Fixture exact match = 评测器输出与该 fixture 的 expected 字段完全一致"
+          ]
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "status": "ready",
+    "generatedAt": "2026-08-09T19:53:47.919294Z",
+    "datasets": {
+      "headline": [
+        {
+          "contract_passed": 25,
+          "contract_total": 25,
+          "heuristic_passed": 8,
+          "heuristic_total": 8,
+          "raw_records": 7919,
+          "opportunities": 7890,
+          "field_claims": 79648,
+          "origin_coverage": 1.0,
+          "materialization_coverage": 0.998737,
+          "fixture_data_class": "fully synthetic",
+          "database_privacy_mode": "aggregate_only"
+        }
+      ],
+      "quality_gates": [
+        {
+          "metric": "安全边界契约",
+          "rate": 1.0,
+          "passed": 25,
+          "total": 25,
+          "evidence_class": "合成 contract fixtures",
+          "interpretation": "只证明声明边界没有回归"
+        },
+        {
+          "metric": "启发式回归样本",
+          "rate": 1.0,
+          "passed": 8,
+          "total": 8,
+          "evidence_class": "开发者编写合成样本",
+          "interpretation": "不可外推为真实准确率"
+        },
+        {
+          "metric": "机会来源覆盖",
+          "rate": 1.0,
+          "passed": 7890,
+          "total": 7890,
+          "evidence_class": "私有基线聚合统计",
+          "interpretation": "只衡量结构追溯"
+        },
+        {
+          "metric": "原始记录物化覆盖",
+          "rate": 0.998737,
+          "passed": 7909,
+          "total": 7919,
+          "evidence_class": "私有基线聚合统计",
+          "interpretation": "部分或拒绝记录保留在原始层"
+        }
+      ],
+      "api_performance": [
+        {
+          "action": "岗位池首屏",
+          "endpoint": "opportunity_list_first_page",
+          "http_status": 200,
+          "median_ms": 28.46,
+          "p95_ms": 28.8,
+          "min_ms": 27.87,
+          "max_ms": 28.86,
+          "sample_count": 5,
+          "warmup_count": 1,
+          "measurement_scope": "local in-process FastAPI TestClient"
+        },
+        {
+          "action": "今日决策汇总",
+          "endpoint": "workspace_dashboard",
+          "http_status": 200,
+          "median_ms": 52.92,
+          "p95_ms": 53.3,
+          "min_ms": 52.63,
+          "max_ms": 53.34,
+          "sample_count": 5,
+          "warmup_count": 1,
+          "measurement_scope": "local in-process FastAPI TestClient"
+        },
+        {
+          "action": "岗位证据详情",
+          "endpoint": "opportunity_detail",
+          "http_status": 200,
+          "median_ms": 3.35,
+          "p95_ms": 3.72,
+          "min_ms": 3.31,
+          "max_ms": 3.8,
+          "sample_count": 5,
+          "warmup_count": 1,
+          "measurement_scope": "local in-process FastAPI TestClient"
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "evaluation-results",
+      "label": "可复现评测聚合结果",
+      "path": "evaluation/results/latest.json",
+      "description": "由 evaluation-harness.v1 生成的聚合结果。",
+      "query": {
+        "engine": "DuckDB",
+        "language": "sql",
+        "id": "evaluation-results-json-v1",
+        "executed_at": "2026-08-09T19:53:47.919294Z",
+        "sql": "SELECT * FROM read_json_auto('evaluation/results/latest.json');",
+        "description": "读取评测器已经审计并聚合的 JSON 结果。",
+        "tables_used": [
+          "evaluation/results/latest.json"
+        ],
+        "filters": [
+          "私有数据仅保留聚合计数与比率"
+        ],
+        "metric_definitions": [
+          "边界通过率、结构覆盖率和本地延迟均使用 evaluation-harness.v1 的显式定义"
+        ]
+      }
+    },
+    {
+      "id": "fixture-manifest",
+      "label": "合成 Gold Fixture 清单",
+      "path": "evaluation/fixtures/gold.json",
+      "description": "开发者编写的合成输入和预期。",
+      "query": {
+        "engine": "DuckDB",
+        "language": "sql",
+        "id": "gold-fixtures-json-v1",
+        "sql": "SELECT * FROM read_json_auto('evaluation/fixtures/gold.json');",
+        "description": "读取可逐条审阅的合成输入与期望。",
+        "tables_used": [
+          "evaluation/fixtures/gold.json"
+        ],
+        "filters": [
+          "完全合成"
+        ],
+        "metric_definitions": [
+          "Fixture exact match = 评测器输出与期望完全一致"
+        ]
+      }
+    }
+  ]
+}

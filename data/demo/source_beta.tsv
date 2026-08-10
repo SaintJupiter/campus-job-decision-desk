@@ -1,0 +1,5 @@
+record_id	employer	role	location	graduate_year	degree	batch	employer_type	written_test	deadline	source_url	application_url	notes
+B-100	星链智算科技有限公司	智算平台产品经理（校招）	上海	2027届	硕士	秋招	民营企业	免笔试	2026-10-10	https://careers.star-sea.example/jobs/PM1001?utm_source=vendor-b	https://careers.star-sea.example/jobs/PM1001	截止时间与来源甲冲突
+B-101	识图数据科技有限公司	AI 数据分析实习生（产品方向）	上海/杭州	2026届、2027届	硕士	秋招	外企	免笔试	尽快投递	https://jobs.deepblue.example/position/DP2027	https://jobs.deepblue.example/position/DP2027	城市和届次需要官网确认
+B-102	碳硅软件	AI 解决方案设计实习生	上海	2027届	硕士	秋招	民营企业	有笔试	招满为止	https://jobs.same-a.example/job/1001	https://jobs.same-a.example/job/1001	官方具体岗位待核验
+B-103	云构科技	工业软件技术产品经理	上海	2027届	硕士	秋招	国企	有笔试	招满为止	https://jobs.same-b.example/job/1009	https://jobs.same-b.example/job/1009	官方具体岗位待核验

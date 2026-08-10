@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: campus-job-decision-desk
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: CJD_ENVIRONMENT
+        value: public-demo
+      - key: CJD_DATABASE_URL
+        value: sqlite:///data/demo/public-demo.sqlite

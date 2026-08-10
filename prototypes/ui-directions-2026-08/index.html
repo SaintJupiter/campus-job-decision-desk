@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>校招岗位决策台 · 视觉方向原型</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body { font-family: Inter, "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      .concept { display: none; min-height: 100vh; }
+      .concept.active { display: block; }
+      .prototype-switcher {
+        position: fixed; z-index: 100; left: 50%; bottom: 22px; transform: translateX(-50%);
+        display: flex; align-items: center; gap: 7px; padding: 7px;
+        color: #fff; background: rgba(15, 18, 24, .94); border: 1px solid rgba(255,255,255,.14);
+        border-radius: 999px; box-shadow: 0 18px 45px rgba(0,0,0,.28); backdrop-filter: blur(16px);
+      }
+      .prototype-switcher button { min-width: 38px; height: 38px; border: 0; border-radius: 999px; color: inherit; background: rgba(255,255,255,.08); }
+      .prototype-switcher button:hover { background: rgba(255,255,255,.17); }
+      .prototype-switcher .label { min-width: 238px; text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+      .prototype-note { position: fixed; z-index: 90; right: 18px; bottom: 24px; color: #6a6d76; font: 11px ui-monospace, monospace; }
+
+      /* A — Evidence ledger / Carbon + editorial grid */
+      .ledger { color: #161616; background: #f4f4f4; }
+      .ledger .topline { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; color: #f4f4f4; background: #161616; }
+      .ledger .brand { font-weight: 600; letter-spacing: .02em; }
+      .ledger .topmeta { display: flex; gap: 28px; color: #c6c6c6; font-size: 13px; }
+      .ledger .hero { display: grid; grid-template-columns: 8fr 4fr; border-bottom: 1px solid #8d8d8d; background: #fff; }
+      .ledger .hero-main { padding: 46px 32px 38px; border-right: 1px solid #c6c6c6; }
+      .ledger .eyebrow { margin-bottom: 26px; color: #0f62fe; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+      .ledger h1 { margin: 0; max-width: 760px; font-size: clamp(42px, 5vw, 72px); line-height: .98; font-weight: 300; letter-spacing: -.045em; }
+      .ledger .hero-main p { max-width: 690px; margin: 24px 0 0; color: #525252; font-size: 16px; line-height: 1.55; }
+      .ledger .hero-side { display: grid; grid-template-columns: 1fr 1fr; }
+      .ledger .stat { display: flex; min-height: 126px; flex-direction: column; justify-content: space-between; padding: 20px; border: 0 solid #c6c6c6; border-right-width: 1px; border-bottom-width: 1px; }
+      .ledger .stat:nth-child(2n) { border-right: 0; }
+      .ledger .stat:nth-child(n+3) { border-bottom: 0; }
+      .ledger .stat span { color: #525252; font-size: 12px; }
+      .ledger .stat strong { font-size: 35px; font-weight: 300; }
+      .ledger .workarea { display: grid; grid-template-columns: minmax(0, 8fr) minmax(330px, 4fr); min-height: 690px; }
+      .ledger .queue { padding: 30px 32px 110px; background: #fff; border-right: 1px solid #c6c6c6; }
+      .ledger .section-head { display: flex; justify-content: space-between; align-items: end; margin-bottom: 18px; }
+      .ledger .section-head h2 { margin: 0; font-size: 26px; font-weight: 400; }
+      .ledger .section-head button { border: 0; padding: 12px 46px 12px 14px; color: #fff; background: #0f62fe; border-radius: 0; }
+      .ledger .column-head, .ledger .job-row { display: grid; grid-template-columns: 64px 1.5fr .9fr .8fr .9fr 50px; align-items: center; }
+      .ledger .column-head { min-height: 38px; color: #525252; background: #e0e0e0; font-size: 11px; letter-spacing: .04em; }
+      .ledger .column-head > span, .ledger .job-row > div { padding: 0 12px; }
+      .ledger .job-row { min-height: 84px; border-bottom: 1px solid #e0e0e0; transition: background .16s; }
+      .ledger .job-row:hover, .ledger .job-row.selected { background: #edf5ff; }
+      .ledger .job-row.selected { box-shadow: inset 4px 0 #0f62fe; }
+      .ledger .rank { font: 12px ui-monospace, monospace; color: #6f6f6f; }
+      .ledger .role strong, .ledger .role span { display: block; }
+      .ledger .role strong { margin-bottom: 5px; font-size: 15px; }
+      .ledger .role span, .ledger .job-row small { color: #6f6f6f; font-size: 12px; }
+      .ledger .signal { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; }
+      .ledger .signal::before { content: ""; width: 8px; height: 8px; background: #24a148; }
+      .ledger .signal.warn::before { background: #f1c21b; }
+      .ledger .signal.fail::before { background: #da1e28; }
+      .ledger .arrow { font-size: 22px; font-weight: 300; }
+      .ledger .evidence { padding: 30px 24px 110px; background: #f4f4f4; }
+      .ledger .evidence h2 { margin: 0 0 8px; font-size: 26px; font-weight: 400; }
+      .ledger .evidence > p { margin: 0 0 28px; color: #525252; font-size: 13px; line-height: 1.5; }
+      .ledger .axis { display: grid; grid-template-columns: 104px 1fr; min-height: 88px; border-top: 1px solid #8d8d8d; padding: 16px 0; }
+      .ledger .axis:last-of-type { border-bottom: 1px solid #8d8d8d; }
+      .ledger .axis-label { font: 12px ui-monospace, monospace; color: #525252; }
+      .ledger .axis strong { display: block; margin-bottom: 7px; font-size: 20px; font-weight: 400; }
+      .ledger .axis p { margin: 0; color: #525252; font-size: 12px; line-height: 1.5; }
+      .ledger .proof { margin-top: 24px; padding: 18px; color: #fff; background: #161616; }
+      .ledger .proof small { color: #a8a8a8; }
+      .ledger .proof p { margin: 14px 0 0; line-height: 1.55; }
+
+      /* B — Attio/Airtable-style data workbench */
+      .workbench { color: #181d26; background: #f7f8fa; }
+      .workbench .appbar { height: 54px; display: flex; align-items: center; gap: 24px; padding: 0 18px; background: #fff; border-bottom: 1px solid #e0e2e6; }
+      .workbench .logo-mark { display: grid; place-items: center; width: 30px; height: 30px; color: #fff; background: #1b61c9; border-radius: 8px; font-size: 13px; font-weight: 800; }
+      .workbench .app-title { font-weight: 700; }
+      .workbench .workspace-name { color: #667085; font-size: 13px; }
+      .workbench .app-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+      .workbench .search { width: 255px; padding: 9px 12px; border: 1px solid #d8dce3; border-radius: 9px; background: #f8fafc; }
+      .workbench .avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #f0d8ff; font-size: 12px; }
+      .workbench .tabs { height: 46px; display: flex; align-items: end; gap: 24px; padding: 0 20px; background: #fff; border-bottom: 1px solid #e0e2e6; }
+      .workbench .tab { height: 46px; display: flex; align-items: center; color: #667085; font-size: 13px; border-bottom: 2px solid transparent; }
+      .workbench .tab.active { color: #181d26; border-bottom-color: #1b61c9; font-weight: 650; }
+      .workbench .toolbar { min-height: 58px; display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fff; border-bottom: 1px solid #e0e2e6; }
+      .workbench .toolbar h1 { margin: 0 16px 0 0; font-size: 18px; }
+      .workbench .tool { padding: 7px 10px; color: #4a5363; background: #fff; border: 1px solid #d8dce3; border-radius: 8px; font-size: 12px; }
+      .workbench .tool.active { color: #174ea6; background: #eef5ff; border-color: #b9d3ff; }
+      .workbench .sync { margin-left: auto; color: #087e6b; font-size: 12px; }
+      .workbench .layout { display: grid; grid-template-columns: minmax(650px, 1fr) 360px; height: calc(100vh - 158px); min-height: 680px; }
+      .workbench .grid-wrap { min-width: 0; overflow: auto; background: #fff; }
+      .workbench .data-grid { min-width: 930px; }
+      .workbench .grid-header, .workbench .data-row { display: grid; grid-template-columns: 40px 2fr 1.25fr .7fr .9fr .8fr .8fr; }
+      .workbench .grid-header { position: sticky; top: 0; z-index: 2; min-height: 38px; align-items: center; color: #667085; background: #f8fafc; border-bottom: 1px solid #dfe3e9; font-size: 11px; }
+      .workbench .grid-header span, .workbench .data-row > div { padding: 0 10px; border-right: 1px solid #edf0f3; }
+      .workbench .data-row { min-height: 62px; align-items: center; border-bottom: 1px solid #edf0f3; font-size: 12px; }
+      .workbench .data-row:hover, .workbench .data-row.selected { background: #f4f8ff; }
+      .workbench .data-row.selected { box-shadow: inset 3px 0 #1b61c9; }
+      .workbench .check { width: 15px; height: 15px; border: 1px solid #c7cdd6; border-radius: 4px; }
+      .workbench .role-cell strong, .workbench .role-cell span { display: block; }
+      .workbench .role-cell span { margin-top: 5px; color: #707989; font-size: 11px; }
+      .workbench .chip { display: inline-flex; padding: 4px 7px; border-radius: 6px; background: #eef5ff; color: #174ea6; }
+      .workbench .chip.green { color: #176b47; background: #eaf7ef; }
+      .workbench .chip.amber { color: #805900; background: #fff4ce; }
+      .workbench .chip.gray { color: #586174; background: #eff1f4; }
+      .workbench .inspector { overflow: auto; padding: 20px 18px 100px; background: #fbfcfe; border-left: 1px solid #dfe3e9; }
+      .workbench .inspector-top { display: flex; justify-content: space-between; align-items: start; }
+      .workbench .inspector h2 { margin: 5px 0 4px; font-size: 20px; }
+      .workbench .company { color: #667085; font-size: 13px; }
+      .workbench .more { border: 0; background: transparent; color: #667085; }
+      .workbench .scoreline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 22px 0; }
+      .workbench .score { padding: 10px; border: 1px solid #e0e2e6; border-radius: 10px; background: #fff; }
+      .workbench .score small { display: block; color: #7c8492; font-size: 10px; }
+      .workbench .score strong { display: block; margin-top: 5px; font-size: 14px; }
+      .workbench .property { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid #e5e8ed; font-size: 12px; }
+      .workbench .property > span { color: #7c8492; }
+      .workbench .source-stack { margin-top: 22px; }
+      .workbench .source-stack h3 { margin: 0 0 10px; font-size: 13px; }
+      .workbench .source { padding: 10px; border: 1px solid #e0e2e6; border-radius: 9px; background: #fff; margin-top: 7px; }
+      .workbench .source strong { display: block; font-size: 12px; }
+      .workbench .source span { color: #7c8492; font-size: 11px; }
+      .workbench .inspector-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+      .workbench .inspector-actions button { padding: 10px; border: 1px solid #d8dce3; border-radius: 9px; background: #fff; }
+      .workbench .inspector-actions .primary { color: #fff; background: #1b61c9; border-color: #1b61c9; }
+
+      /* C — PostHog-ish warm field journal */
+      .journal { color: #34372e; background: #f5f3e8; }
+      .journal .masthead { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 76px; padding: 0 34px; border-bottom: 1px solid #aeb1a5; }
+      .journal .edition { font: 12px ui-monospace, monospace; color: #6c6f64; }
+      .journal .wordmark { font-size: 20px; font-weight: 800; letter-spacing: -.03em; }
+      .journal .navlinks { justify-self: end; display: flex; gap: 20px; font-size: 13px; font-weight: 650; }
+      .journal .cover { display: grid; grid-template-columns: 1.25fr .75fr; max-width: 1460px; margin: 0 auto; border-inline: 1px solid #aeb1a5; }
+      .journal .cover-main { padding: 42px 38px 32px; border-right: 1px solid #aeb1a5; }
+      .journal .kicker { color: #f54e00; font: 12px ui-monospace, monospace; text-transform: uppercase; letter-spacing: .12em; }
+      .journal h1 { margin: 14px 0 18px; max-width: 820px; font-size: clamp(42px, 5.3vw, 78px); line-height: .97; letter-spacing: -.055em; }
+      .journal .dek { max-width: 760px; margin: 0; color: #5e6157; font-size: 17px; line-height: 1.6; }
+      .journal .cover-side { display: grid; grid-template-columns: 1fr 1fr; }
+      .journal .brief { display: flex; flex-direction: column; justify-content: space-between; min-height: 145px; padding: 18px; border-right: 1px solid #aeb1a5; border-bottom: 1px solid #aeb1a5; background: #eeeee4; }
+      .journal .brief:nth-child(2n) { border-right: 0; }
+      .journal .brief:nth-child(n+3) { border-bottom: 0; }
+      .journal .brief span { color: #6c6f64; font: 11px ui-monospace, monospace; text-transform: uppercase; }
+      .journal .brief strong { font-size: 34px; }
+      .journal .brief em { color: #f54e00; font-size: 12px; font-style: normal; }
+      .journal .board { display: grid; grid-template-columns: .72fr 1.55fr .95fr; max-width: 1460px; min-height: 660px; margin: 0 auto; border: 1px solid #aeb1a5; border-top: 0; }
+      .journal .board > section { padding: 26px 22px 110px; border-right: 1px solid #aeb1a5; }
+      .journal .board > section:last-child { border-right: 0; }
+      .journal .section-number { display: block; margin-bottom: 34px; color: #7a7d71; font: 11px ui-monospace, monospace; }
+      .journal h2 { margin: 0 0 18px; font-size: 22px; }
+      .journal .route { position: relative; padding-left: 26px; }
+      .journal .route::before { content: ""; position: absolute; left: 7px; top: 4px; bottom: 4px; border-left: 1px dashed #8d9085; }
+      .journal .route-step { position: relative; padding: 0 0 24px; }
+      .journal .route-step::before { content: ""; position: absolute; left: -23px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: #f5f3e8; border: 2px solid #45483f; }
+      .journal .route-step.active::before { background: #f54e00; border-color: #f54e00; }
+      .journal .route-step strong { display: block; font-size: 14px; }
+      .journal .route-step span { display: block; margin-top: 4px; color: #74776c; font-size: 11px; line-height: 1.45; }
+      .journal .dossier { padding: 18px 0; border-top: 1px solid #aeb1a5; }
+      .journal .dossier:first-of-type { border-top: 2px solid #34372e; }
+      .journal .dossier-head { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: start; }
+      .journal .dossier-id { font: 11px ui-monospace, monospace; color: #777a6f; }
+      .journal .dossier h3 { margin: 0; font-size: 19px; }
+      .journal .dossier h3 span { display: block; margin-top: 3px; color: #686b61; font-size: 13px; font-weight: 500; }
+      .journal .stamp { transform: rotate(-2deg); padding: 5px 8px; color: #13724b; border: 1px solid #13724b; font: 10px ui-monospace, monospace; text-transform: uppercase; }
+      .journal .stamp.warn { color: #a34a18; border-color: #a34a18; }
+      .journal .dossier-meta { display: flex; gap: 16px; margin: 14px 0 0 54px; color: #6d7066; font: 11px ui-monospace, monospace; }
+      .journal .clipping { margin-top: 24px; padding: 18px; background: #e8e5d7; border: 1px dashed #9da095; }
+      .journal .clipping .clip-label { color: #f54e00; font: 11px ui-monospace, monospace; }
+      .journal .clipping p { margin: 13px 0 0; font-size: 14px; line-height: 1.65; }
+      .journal .fact { padding: 15px 0; border-top: 1px solid #bfc1b7; }
+      .journal .fact small { display: block; color: #777a6f; font: 10px ui-monospace, monospace; text-transform: uppercase; }
+      .journal .fact strong { display: block; margin: 6px 0; font-size: 17px; }
+      .journal .fact p { margin: 0; color: #66695f; font-size: 12px; line-height: 1.5; }
+      .journal .action { width: 100%; margin-top: 18px; padding: 12px; color: #fdfdf8; background: #1e1f23; border: 0; border-radius: 4px; font-weight: 700; }
+      .journal .action:hover { color: #f7a501; opacity: .86; }
+
+      /* D — Recommended hybrid, richer semantic palette */
+      .spectrum { color: #252633; background: #f3f1eb; }
+      .spectrum .colorline { height: 6px; background: linear-gradient(90deg, #4056d6 0 32%, #168a83 32% 53%, #e6a52d 53% 72%, #df5f50 72% 88%, #8467c5 88%); }
+      .spectrum .head { display: flex; align-items: center; min-height: 64px; padding: 0 30px; background: #fbfaf6; border-bottom: 1px solid #c8c5bb; }
+      .spectrum .brandlock { display: flex; align-items: center; gap: 11px; font-weight: 800; }
+      .spectrum .brandmark { display: grid; place-items: center; width: 34px; height: 34px; color: #fff; background: #4056d6; border-radius: 50% 50% 50% 8px; }
+      .spectrum .head nav { display: flex; gap: 23px; margin-left: 46px; color: #68685f; font-size: 13px; }
+      .spectrum .head nav .active { color: #252633; font-weight: 700; }
+      .spectrum .head-status { margin-left: auto; color: #16736e; font-size: 12px; }
+      .spectrum .intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(440px, .8fr); background: #fbfaf6; border-bottom: 1px solid #c8c5bb; }
+      .spectrum .intro-copy { padding: 34px 36px 30px; border-right: 1px solid #c8c5bb; }
+      .spectrum .intro-copy small { color: #4056d6; font: 11px ui-monospace, monospace; letter-spacing: .13em; }
+      .spectrum .intro-copy h1 { margin: 12px 0 12px; font-size: clamp(35px, 4.1vw, 58px); line-height: 1.02; letter-spacing: -.05em; }
+      .spectrum .intro-copy p { max-width: 680px; margin: 0; color: #68685f; font-size: 15px; line-height: 1.55; }
+      .spectrum .signals { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .spectrum .signal-card { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; padding: 20px 16px; border-right: 1px solid #c8c5bb; }
+      .spectrum .signal-card:last-child { border-right: 0; }
+      .spectrum .signal-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--signal); }
+      .spectrum .signal-card span { color: #77766d; font-size: 11px; }
+      .spectrum .signal-card strong { margin-top: 20px; color: var(--signal); font-size: 30px; }
+      .spectrum .signal-card em { margin-top: 4px; color: #77766d; font-size: 10px; font-style: normal; }
+      .spectrum .canvas { display: grid; grid-template-columns: minmax(650px, 1fr) 370px; min-height: 660px; }
+      .spectrum .records { min-width: 0; padding: 26px 28px 105px; background: #f8f7f2; border-right: 1px solid #c8c5bb; }
+      .spectrum .record-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+      .spectrum .record-toolbar h2 { margin: 0 15px 0 0; font-size: 23px; }
+      .spectrum .filter { padding: 7px 9px; color: #55564e; background: transparent; border: 1px solid #c8c5bb; border-radius: 5px; font-size: 11px; }
+      .spectrum .filter.active { color: #3147ba; background: #e9edff; border-color: #9eaae9; }
+      .spectrum .count { margin-left: auto; color: #77766d; font: 11px ui-monospace, monospace; }
+      .spectrum .record-head, .spectrum .record { display: grid; grid-template-columns: 38px 1.65fr .82fr .88fr .88fr 48px; align-items: center; }
+      .spectrum .record-head { min-height: 35px; color: #74746b; background: #e8e5dc; font-size: 10px; letter-spacing: .05em; }
+      .spectrum .record-head span, .spectrum .record > div { padding: 0 10px; }
+      .spectrum .record { position: relative; min-height: 74px; border-bottom: 1px solid #d8d5cb; background: #fbfaf6; }
+      .spectrum .record::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--row); }
+      .spectrum .record:hover, .spectrum .record.selected { background: #fff; }
+      .spectrum .record.selected { box-shadow: 0 10px 25px rgba(46,43,37,.07); z-index: 1; }
+      .spectrum .record-id { color: #8b8980; font: 10px ui-monospace, monospace; }
+      .spectrum .record-role strong, .spectrum .record-role span { display: block; }
+      .spectrum .record-role strong { font-size: 14px; }
+      .spectrum .record-role span { margin-top: 5px; color: #7a7970; font-size: 11px; }
+      .spectrum .lozenge { display: inline-flex; padding: 5px 7px; color: var(--tone); background: color-mix(in srgb, var(--tone) 12%, #fff); border: 1px solid color-mix(in srgb, var(--tone) 35%, #fff); border-radius: 999px; font-size: 10px; }
+      .spectrum .record-arrow { font-size: 20px; }
+      .spectrum .casefile { padding: 26px 22px 105px; background: #eeebe2; }
+      .spectrum .case-kicker { color: #8467c5; font: 11px ui-monospace, monospace; letter-spacing: .1em; }
+      .spectrum .casefile h2 { margin: 9px 0 4px; font-size: 23px; }
+      .spectrum .case-company { color: #727168; font-size: 12px; }
+      .spectrum .triad { margin: 22px 0; border-top: 1px solid #bbb8ae; }
+      .spectrum .triad-row { display: grid; grid-template-columns: 8px 94px 1fr; gap: 10px; padding: 15px 0; border-bottom: 1px solid #bbb8ae; }
+      .spectrum .triad-row i { width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; background: var(--axis); }
+      .spectrum .triad-row small { color: #77766d; font: 10px ui-monospace, monospace; }
+      .spectrum .triad-row strong { color: var(--axis); font-size: 14px; }
+      .spectrum .triad-row p { grid-column: 3; margin: -3px 0 0; color: #66665e; font-size: 11px; line-height: 1.45; }
+      .spectrum .quotation { padding: 15px; background: #f9f7ff; border-left: 5px solid #8467c5; }
+      .spectrum .quotation small { color: #7054af; font: 10px ui-monospace, monospace; }
+      .spectrum .quotation p { margin: 10px 0 0; font-size: 12px; line-height: 1.55; }
+      .spectrum .case-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+      .spectrum .case-actions button { padding: 11px; border: 1px solid #b5b2a9; border-radius: 5px; background: transparent; }
+      .spectrum .case-actions .primary { color: #fff; background: #4056d6; border-color: #4056d6; }
+
+      /* E — Bright block mosaic: large pastel fields, not tiny color accents */
+      .blocks { color: #22212d; background: #f6f3ff; }
+      .blocks .nav { display: flex; min-height: 68px; align-items: center; padding: 0 28px; background: #fffdf9; border-bottom: 1px solid #282631; }
+      .blocks .identity { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 850; }
+      .blocks .identity-mark { display: grid; place-items: center; width: 37px; height: 37px; color: #fff; background: #6f54d9; border: 1px solid #282631; border-radius: 11px; box-shadow: 3px 3px 0 #282631; }
+      .blocks .navlinks { display: flex; gap: 25px; margin-left: 54px; color: #66616f; font-size: 13px; }
+      .blocks .navlinks .active { color: #22212d; font-weight: 750; }
+      .blocks .profile { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 12px; }
+      .blocks .online { width: 9px; height: 9px; background: #33a977; border: 1px solid #22212d; border-radius: 50%; }
+      .blocks .mosaic { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(480px, .75fr); gap: 12px; padding: 12px; }
+      .blocks .hero-block { display: flex; min-height: 310px; flex-direction: column; justify-content: space-between; padding: 30px 34px; background: #cfc4ff; border: 1px solid #282631; border-radius: 22px; box-shadow: 5px 5px 0 #282631; }
+      .blocks .hero-block small { width: fit-content; padding: 7px 10px; background: #fffdf9; border: 1px solid #282631; border-radius: 999px; font: 11px ui-monospace, monospace; }
+      .blocks .hero-block h1 { max-width: 760px; margin: 20px 0 12px; font-size: clamp(42px, 5vw, 72px); line-height: .95; letter-spacing: -.06em; }
+      .blocks .hero-block p { max-width: 720px; margin: 0; font-size: 15px; line-height: 1.55; }
+      .blocks .hero-foot { display: flex; align-items: end; justify-content: space-between; margin-top: 25px; }
+      .blocks .hero-foot span { font-size: 12px; color: #4f4868; }
+      .blocks .hero-foot button { padding: 12px 18px; color: #fff; background: #22212d; border: 1px solid #22212d; border-radius: 9px; font-weight: 750; }
+      .blocks .metric-mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .blocks .metric-block { display: flex; min-height: 149px; flex-direction: column; justify-content: space-between; padding: 19px; background: var(--fill); border: 1px solid #282631; border-radius: 18px; box-shadow: 4px 4px 0 #282631; }
+      .blocks .metric-block span { font-size: 12px; font-weight: 700; }
+      .blocks .metric-block strong { font-size: 42px; line-height: 1; }
+      .blocks .metric-block em { font-size: 11px; font-style: normal; color: #4e4b50; }
+      .blocks .mission { display: grid; grid-template-columns: 1fr auto; align-items: center; min-height: 88px; margin: 0 12px 12px; padding: 17px 24px; background: #ffe783; border: 1px solid #282631; border-radius: 18px; box-shadow: 4px 4px 0 #282631; }
+      .blocks .mission small { font: 10px ui-monospace, monospace; }
+      .blocks .mission strong { display: block; margin-top: 5px; font-size: 19px; }
+      .blocks .progress-ring { display: flex; align-items: center; gap: 13px; }
+      .blocks .progress-ring span { font-size: 12px; }
+      .blocks .bar { width: 180px; height: 11px; overflow: hidden; background: rgba(255,255,255,.6); border: 1px solid #282631; border-radius: 999px; }
+      .blocks .bar::after { content: ""; display: block; width: 44%; height: 100%; background: #6f54d9; }
+      .blocks .workboard { display: grid; grid-template-columns: minmax(650px, 1.3fr) minmax(380px, .7fr); gap: 12px; padding: 0 12px 110px; }
+      .blocks .jobs-block { overflow: hidden; background: #fffdf9; border: 1px solid #282631; border-radius: 20px; box-shadow: 5px 5px 0 #282631; }
+      .blocks .jobs-head { display: flex; align-items: center; min-height: 66px; padding: 0 20px; border-bottom: 1px solid #282631; }
+      .blocks .jobs-head h2 { margin: 0; font-size: 22px; }
+      .blocks .jobs-head .tabs { display: flex; gap: 7px; margin-left: 18px; }
+      .blocks .jobs-head button { padding: 7px 9px; border: 1px solid #aaa5b2; border-radius: 8px; background: #f4f1f7; font-size: 11px; }
+      .blocks .jobs-head button.active { background: #c9dcff; border-color: #282631; }
+      .blocks .jobs-head .total { margin-left: auto; font: 11px ui-monospace, monospace; }
+      .blocks .color-job { display: grid; grid-template-columns: 48px 1.35fr .8fr .78fr .82fr 42px; align-items: center; min-height: 82px; border-bottom: 1px solid #bdb9c1; background: var(--rowfill); }
+      .blocks .color-job:last-child { border-bottom: 0; }
+      .blocks .color-job > div { padding: 0 11px; }
+      .blocks .job-number { font: 10px ui-monospace, monospace; }
+      .blocks .job-name strong, .blocks .job-name span { display: block; }
+      .blocks .job-name strong { font-size: 14px; }
+      .blocks .job-name span { margin-top: 5px; color: #68636f; font-size: 11px; }
+      .blocks .plain-status { font-size: 11px; font-weight: 750; }
+      .blocks .plain-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; background: var(--dot); border: 1px solid #282631; border-radius: 50%; }
+      .blocks .open-job { font-size: 22px; }
+      .blocks .evidence-column { display: grid; gap: 12px; }
+      .blocks .case-title { padding: 20px; background: #b9dcff; border: 1px solid #282631; border-radius: 20px; box-shadow: 4px 4px 0 #282631; }
+      .blocks .case-title small { font: 10px ui-monospace, monospace; }
+      .blocks .case-title h2 { margin: 8px 0 4px; font-size: 23px; }
+      .blocks .case-title p { margin: 0; font-size: 12px; }
+      .blocks .axis-mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .blocks .axis-block { min-height: 142px; padding: 17px; background: var(--fill); border: 1px solid #282631; border-radius: 18px; box-shadow: 3px 3px 0 #282631; }
+      .blocks .axis-block.wide { grid-column: 1 / -1; min-height: 126px; }
+      .blocks .axis-block small { font: 10px ui-monospace, monospace; }
+      .blocks .axis-block strong { display: block; margin: 14px 0 7px; font-size: 20px; }
+      .blocks .axis-block p { margin: 0; font-size: 11px; line-height: 1.45; }
+      .blocks .source-note { padding: 17px; background: #ffbcae; border: 1px solid #282631; border-radius: 18px; box-shadow: 3px 3px 0 #282631; }
+      .blocks .source-note strong { display: block; margin-bottom: 6px; }
+      .blocks .source-note p { margin: 0; font-size: 11px; line-height: 1.5; }
+
+      /* E v2 — relaxed color fields: three focal blocks, generous background */
+      .relaxed { color: #272631; background: #f7f5f1; }
+      .relaxed .r-nav { max-width: 1180px; min-height: 76px; display: flex; align-items: center; margin: 0 auto; padding: 0 8px; border-bottom: 1px solid rgba(39,38,49,.12); }
+      .relaxed .r-brand { display: flex; align-items: center; gap: 12px; font-weight: 780; }
+      .relaxed .r-mark { display: grid; place-items: center; width: 36px; height: 36px; color: #fff; background: #755ee5; border-radius: 12px; }
+      .relaxed .r-links { display: flex; gap: 28px; margin-left: 58px; color: #7a7782; font-size: 13px; }
+      .relaxed .r-links .active { color: #272631; }
+      .relaxed .r-sync { margin-left: auto; color: #42856d; font-size: 12px; }
+      .relaxed .r-shell { max-width: 1180px; margin: 0 auto; padding: 54px 8px 120px; }
+      .relaxed .r-hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .65fr); gap: 28px; align-items: stretch; }
+      .relaxed .r-hero-main { display: flex; min-height: 306px; flex-direction: column; justify-content: space-between; padding: 44px 48px; background: #d9d0ff; border-radius: 32px; }
+      .relaxed .r-kicker { color: #5947b9; font: 11px ui-monospace, monospace; letter-spacing: .11em; }
+      .relaxed .r-hero-main h1 { max-width: 720px; margin: 20px 0 16px; font-size: clamp(42px, 5vw, 68px); line-height: .98; letter-spacing: -.055em; }
+      .relaxed .r-hero-main p { max-width: 680px; margin: 0; color: #5b566b; font-size: 15px; line-height: 1.65; }
+      .relaxed .r-hero-foot { display: flex; justify-content: space-between; align-items: end; margin-top: 32px; }
+      .relaxed .r-hero-foot span { color: #655e79; font-size: 11px; }
+      .relaxed .r-hero-foot button { padding: 12px 17px; color: #fff; background: #272631; border: 0; border-radius: 12px; font-weight: 700; }
+      .relaxed .r-summary { display: flex; flex-direction: column; justify-content: space-between; padding: 34px; background: #fff; border: 1px solid rgba(39,38,49,.1); border-radius: 32px; box-shadow: 0 24px 60px rgba(62,56,47,.07); }
+      .relaxed .r-summary small { color: #8a8790; font-size: 11px; }
+      .relaxed .r-summary strong { display: block; margin: 14px 0 5px; font-size: 54px; line-height: 1; font-weight: 520; }
+      .relaxed .r-summary > p { margin: 0; color: #6d6974; font-size: 13px; line-height: 1.55; }
+      .relaxed .r-summary-list { margin-top: 26px; padding-top: 20px; border-top: 1px solid #e8e5df; }
+      .relaxed .r-summary-row { display: flex; justify-content: space-between; padding: 8px 0; color: #77737d; font-size: 12px; }
+      .relaxed .r-summary-row b { color: #272631; }
+      .relaxed .r-mission { display: flex; align-items: center; min-height: 112px; margin-top: 40px; padding: 24px 34px; background: #ffeba7; border-radius: 28px; }
+      .relaxed .r-mission-copy small { color: #8e7224; font: 10px ui-monospace, monospace; letter-spacing: .08em; }
+      .relaxed .r-mission-copy strong { display: block; margin-top: 8px; font-size: 19px; }
+      .relaxed .r-progress { width: 210px; margin-left: auto; }
+      .relaxed .r-progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; color: #6e5d2d; font-size: 11px; }
+      .relaxed .r-progress-track { height: 8px; overflow: hidden; background: rgba(255,255,255,.75); border-radius: 999px; }
+      .relaxed .r-progress-track span { display: block; width: 55%; height: 100%; background: #755ee5; border-radius: inherit; }
+      .relaxed .r-section-head { display: flex; align-items: end; justify-content: space-between; margin: 58px 0 20px; }
+      .relaxed .r-section-head small { color: #8a8790; font: 10px ui-monospace, monospace; letter-spacing: .08em; }
+      .relaxed .r-section-head h2 { margin: 7px 0 0; font-size: 26px; }
+      .relaxed .r-section-head a { color: #6553c3; font-size: 12px; text-decoration: none; }
+      .relaxed .r-work { display: grid; grid-template-columns: minmax(580px, 1.35fr) minmax(330px, .65fr); gap: 28px; align-items: start; }
+      .relaxed .r-list { padding: 12px 24px; background: #fff; border: 1px solid rgba(39,38,49,.09); border-radius: 28px; box-shadow: 0 22px 60px rgba(62,56,47,.06); }
+      .relaxed .r-job { display: grid; grid-template-columns: 1fr auto; gap: 20px; padding: 24px 4px; border-bottom: 1px solid #ece9e3; }
+      .relaxed .r-job:last-child { border-bottom: 0; }
+      .relaxed .r-job.selected { margin-inline: -8px; padding-inline: 12px; background: #f0edff; border-bottom-color: transparent; border-radius: 18px; }
+      .relaxed .r-job-title { display: flex; gap: 16px; align-items: start; }
+      .relaxed .r-job-index { color: #a09ca5; font: 10px ui-monospace, monospace; padding-top: 3px; }
+      .relaxed .r-job h3 { margin: 0; font-size: 15px; }
+      .relaxed .r-job p { margin: 6px 0 0; color: #77737d; font-size: 11px; }
+      .relaxed .r-job-signals { display: flex; gap: 8px; align-items: center; }
+      .relaxed .r-tag { padding: 6px 9px; color: var(--tone); background: color-mix(in srgb, var(--tone) 10%, white); border-radius: 999px; font-size: 10px; white-space: nowrap; }
+      .relaxed .r-open { border: 0; color: #5e50b0; background: transparent; font-size: 20px; }
+      .relaxed .r-evidence { overflow: hidden; background: #d8f2e7; border-radius: 28px; }
+      .relaxed .r-evidence-head { padding: 28px 28px 22px; }
+      .relaxed .r-evidence-head small { color: #38775f; font: 10px ui-monospace, monospace; }
+      .relaxed .r-evidence-head h2 { margin: 9px 0 4px; font-size: 22px; }
+      .relaxed .r-evidence-head p { margin: 0; color: #547565; font-size: 12px; }
+      .relaxed .r-axis-list { padding: 0 28px 28px; }
+      .relaxed .r-axis { display: grid; grid-template-columns: 86px 1fr; gap: 12px; padding: 17px 0; border-top: 1px solid rgba(49,107,84,.2); }
+      .relaxed .r-axis small { color: #56806e; font: 9px ui-monospace, monospace; }
+      .relaxed .r-axis strong { display: block; font-size: 14px; }
+      .relaxed .r-axis p { margin: 5px 0 0; color: #567365; font-size: 10px; line-height: 1.45; }
+      .relaxed .r-quote { margin-top: 28px; padding: 24px 26px; background: #dbeaff; border-radius: 24px; }
+      .relaxed .r-quote small { color: #4d70a6; font: 10px ui-monospace, monospace; }
+      .relaxed .r-quote p { margin: 11px 0 0; color: #4f6480; font-size: 12px; line-height: 1.6; }
+
+      @media (max-width: 980px) {
+        .ledger .hero, .ledger .workarea, .journal .cover, .journal .board, .spectrum .intro, .spectrum .canvas, .blocks .mosaic, .blocks .workboard, .relaxed .r-hero, .relaxed .r-work { grid-template-columns: 1fr; }
+        .ledger .hero-main, .ledger .queue, .journal .cover-main, .journal .board > section { border-right: 0; border-bottom: 1px solid #aeb1a5; }
+        .workbench .layout { grid-template-columns: 1fr; height: auto; }
+        .workbench .inspector { border-left: 0; border-top: 1px solid #dfe3e9; }
+        .spectrum .intro-copy, .spectrum .records { border-right: 0; border-bottom: 1px solid #c8c5bb; }
+        .journal .masthead { grid-template-columns: 1fr auto; }
+        .journal .wordmark { display: none; }
+      }
+      @media (max-width: 620px) {
+        .prototype-switcher { bottom: 10px; }
+        .prototype-switcher .label { min-width: 176px; font-size: 11px; }
+        .prototype-note { display: none; }
+        .ledger .topmeta, .workbench .search, .journal .navlinks, .spectrum .head nav { display: none; }
+        .ledger .topline, .ledger .hero-main, .ledger .queue { padding-inline: 18px; }
+        .ledger .hero-side, .journal .cover-side { grid-template-columns: 1fr 1fr; }
+        .ledger .column-head, .ledger .job-row { grid-template-columns: 44px 1.5fr .85fr 44px; }
+        .ledger .column-head span:nth-child(4), .ledger .column-head span:nth-child(5), .ledger .job-row > div:nth-child(4), .ledger .job-row > div:nth-child(5) { display: none; }
+        .workbench .workspace-name, .workbench .tool:nth-of-type(n+3), .blocks .navlinks, .relaxed .r-links { display: none; }
+        .workbench .layout { display: block; }
+        .workbench .grid-wrap { max-height: 440px; }
+        .journal .masthead, .journal .cover-main, .spectrum .head, .spectrum .intro-copy, .spectrum .records { padding-inline: 18px; }
+        .spectrum .intro { display: block; }
+        .spectrum .signals { grid-template-columns: 1fr 1fr; }
+        .spectrum .signal-card { min-height: 106px; border-bottom: 1px solid #c8c5bb; }
+        .spectrum .record-head, .spectrum .record { grid-template-columns: 35px 1.5fr .85fr 42px; }
+        .spectrum .record-head span:nth-child(4), .spectrum .record-head span:nth-child(5), .spectrum .record > div:nth-child(4), .spectrum .record > div:nth-child(5) { display: none; }
+        .blocks .mosaic { padding: 8px; }
+        .blocks .metric-block { min-height: 125px; }
+        .blocks .mission { margin-inline: 8px; }
+        .blocks .progress-ring .bar { width: 100px; }
+        .blocks .workboard { padding-inline: 8px; }
+        .blocks .color-job { grid-template-columns: 38px 1.4fr .8fr 40px; }
+        .blocks .color-job > div:nth-child(4), .blocks .color-job > div:nth-child(5) { display: none; }
+        .relaxed .r-nav, .relaxed .r-shell { margin-inline: 18px; padding-inline: 0; }
+        .relaxed .r-hero-main { min-height: 360px; padding: 32px 28px; }
+        .relaxed .r-mission { align-items: flex-start; flex-direction: column; gap: 22px; }
+        .relaxed .r-progress { width: 100%; margin-left: 0; }
+        .relaxed .r-job { grid-template-columns: 1fr; }
+        .relaxed .r-job-signals { padding-left: 26px; flex-wrap: wrap; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="concept ledger" data-variant="A">
+        <header class="topline">
+          <div class="brand">JOB EVIDENCE OFFICE / 上海</div>
+          <div class="topmeta"><span>2027 届</span><span>最后同步 09:32</span><span>证据版本 014</span></div>
+        </header>
+        <div class="hero">
+          <div class="hero-main">
+            <div class="eyebrow">Daily evidence bulletin · 10 AUG 2026</div>
+            <h1>今天，不是找更多岗位。<br />是确认哪些真的能投。</h1>
+            <p>把供应商线索、官网岗位与个人证据放在同一张审计表中。宽泛招聘项目不进入投递清单，信息缺失明确显示为未知。</p>
+          </div>
+          <div class="hero-side">
+            <div class="stat"><span>今日线索</span><strong>42</strong></div>
+            <div class="stat"><span>官网已核验</span><strong>11</strong></div>
+            <div class="stat"><span>符合硬条件</span><strong>06</strong></div>
+            <div class="stat"><span>字段冲突</span><strong>08</strong></div>
+          </div>
+        </div>
+        <div class="workarea">
+          <section class="queue">
+            <div class="section-head"><div><div class="eyebrow">01 / Decision register</div><h2>上海岗位决策簿</h2></div><button>导出可信清单 →</button></div>
+            <div class="column-head"><span>序号</span><span>岗位 / 公司</span><span>资格</span><span>可信度</span><span>下一动作</span><span></span></div>
+            <div class="job-row selected"><div class="rank">001</div><div class="role"><strong>大模型 AI 产品实习生</strong><span>星海智能 · Data AML</span></div><div><span class="signal">通过</span></div><div><span class="signal">官网证据</span></div><div><small>今日投递</small></div><div class="arrow">→</div></div>
+            <div class="job-row"><div class="rank">002</div><div class="role"><strong>AI 产品经理</strong><span>云深科技 · 企业服务</span></div><div><span class="signal warn">待确认</span></div><div><span class="signal">官网证据</span></div><div><small>补毕业窗口</small></div><div class="arrow">→</div></div>
+            <div class="job-row"><div class="rank">003</div><div class="role"><strong>技术产品经理</strong><span>同名科技 · 数据平台</span></div><div><span class="signal">通过</span></div><div><span class="signal warn">来源冲突</span></div><div><small>核验城市</small></div><div class="arrow">→</div></div>
+            <div class="job-row"><div class="rank">004</div><div class="role"><strong>2027 届产品类岗位</strong><span>拓竹科技 · 校招项目</span></div><div><span class="signal warn">未知</span></div><div><span class="signal fail">非具体岗位</span></div><div><small>进入官网</small></div><div class="arrow">→</div></div>
+          </section>
+          <aside class="evidence">
+            <div class="eyebrow">02 / Evidence sheet</div><h2>岗位 001 的判定依据</h2><p>三轴不会压成一个“86%匹配度”。每条结论均可回到简历原文或官网证据。</p>
+            <div class="axis"><div class="axis-label">ELIGIBILITY</div><div><strong>PASS</strong><p>上海 · 2027 届 · 本科及以上 · 实习岗位，未发现明确冲突。</p></div></div>
+            <div class="axis"><div class="axis-label">EVIDENCE FIT</div><div><strong>PRIMARY</strong><p>2 条已确认项目证据对应“需求分析、数据治理、跨团队协作”。</p></div></div>
+            <div class="axis"><div class="axis-label">TRUST</div><div><strong>VERIFIED</strong><p>具体岗位页当前可访问；11 小时前核验，无关键字段冲突。</p></div></div>
+            <div class="proof"><small>RESUME EVIDENCE / 原文片段</small><p>“负责智能船舶多源数据平台方案梳理，建立采集—标注—训练—评估的数据闭环……”</p></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="concept workbench" data-variant="B">
+        <header class="appbar"><div class="logo-mark">J</div><div class="app-title">Job Desk</div><div class="workspace-name">Synthetic Demo / 2027 秋招</div><div class="app-actions"><input class="search" placeholder="搜索岗位、公司或证据…  ⌘K" /><div class="avatar">DEMO</div></div></header>
+        <nav class="tabs"><span class="tab active">机会库</span><span class="tab">待核验</span><span class="tab">字段冲突</span><span class="tab">可信短名单</span><span class="tab">来源同步</span></nav>
+        <div class="toolbar"><h1>上海 · AI/技术产品</h1><button class="tool active">2027 届</button><button class="tool">具体岗位</button><button class="tool">资格未失败</button><button class="tool">官网已核验</button><button class="tool">＋ 筛选</button><span class="sync">● 飞书已于 09:32 全量同步</span></div>
+        <div class="layout">
+          <section class="grid-wrap"><div class="data-grid">
+            <div class="grid-header"><span></span><span>岗位</span><span>公司</span><span>城市</span><span>资格</span><span>证据</span><span>信息状态</span></div>
+            <div class="data-row selected"><div><div class="check"></div></div><div class="role-cell"><strong>大模型 AI 产品实习生</strong><span>A110957 · 11小时前核验</span></div><div>星海智能</div><div>上海</div><div><span class="chip green">通过</span></div><div><span class="chip">2 项匹配</span></div><div><span class="chip green">官网在招</span></div></div>
+            <div class="data-row"><div><div class="check"></div></div><div class="role-cell"><strong>AI 产品经理</strong><span>J-2082 · 1天前核验</span></div><div>云深科技</div><div>上海</div><div><span class="chip amber">待确认</span></div><div><span class="chip">3 项匹配</span></div><div><span class="chip green">官网在招</span></div></div>
+            <div class="data-row"><div><div class="check"></div></div><div class="role-cell"><strong>技术产品经理</strong><span>R-0308 · 2天前核验</span></div><div>同名科技</div><div>上海</div><div><span class="chip green">通过</span></div><div><span class="chip">2 项匹配</span></div><div><span class="chip amber">2项冲突</span></div></div>
+            <div class="data-row"><div><div class="check"></div></div><div class="role-cell"><strong>2027届产品类岗位</strong><span>Campaign · 今日新增</span></div><div>拓竹科技</div><div>多城市</div><div><span class="chip gray">不判断</span></div><div><span class="chip gray">—</span></div><div><span class="chip amber">待拆分</span></div></div>
+            <div class="data-row"><div><div class="check"></div></div><div class="role-cell"><strong>数据产品实习生</strong><span>D-6621 · 5天前核验</span></div><div>数禾科技</div><div>上海</div><div><span class="chip green">通过</span></div><div><span class="chip">1 项匹配</span></div><div><span class="chip green">官网在招</span></div></div>
+            <div class="data-row"><div><div class="check"></div></div><div class="role-cell"><strong>行业解决方案实习生</strong><span>S-1120 · 8天前核验</span></div><div>极光云</div><div>上海</div><div><span class="chip amber">待确认</span></div><div><span class="chip">2 项匹配</span></div><div><span class="chip gray">部分核验</span></div></div>
+          </div></section>
+          <aside class="inspector"><div class="inspector-top"><div><small>具体岗位 / A110957</small><h2>大模型 AI 产品实习生</h2><div class="company">星海智能 · Data AML</div></div><button class="more">•••</button></div>
+            <div class="scoreline"><div class="score"><small>ELIGIBILITY</small><strong>通过</strong></div><div class="score"><small>EVIDENCE FIT</small><strong>主要</strong></div><div class="score"><small>TRUST</small><strong>已核验</strong></div></div>
+            <div class="property"><span>城市</span><strong>上海</strong></div><div class="property"><span>毕业届次</span><strong>2027</strong></div><div class="property"><span>岗位类型</span><strong>日常实习</strong></div><div class="property"><span>开放状态</span><strong>OPEN · 11小时前</strong></div>
+            <div class="source-stack"><h3>字段来源</h3><div class="source"><strong>企业官网 · 当前采用</strong><span>上海 / 2027届 / OPEN</span></div><div class="source"><strong>供应商 A · 8月9日</strong><span>上海 / 2027届 / 截止待定</span></div><div class="source"><strong>供应商 B · 8月8日</strong><span>上海、杭州 / 2026–27届</span></div></div>
+            <div class="inspector-actions"><button>查看全部证据</button><button class="primary">加入可信短名单</button></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="concept journal" data-variant="C">
+        <header class="masthead"><div class="edition">SHANGHAI / ISSUE № 014</div><div class="wordmark">THE JOB FIELD NOTES</div><nav class="navlinks"><span>今日线索</span><span>证据档案</span><span>来源日志</span></nav></header>
+        <div class="cover"><div class="cover-main"><div class="kicker">Today’s investigation · 10 August 2026</div><h1>把招聘噪声，整理成今天值得采取的行动。</h1><p class="dek">不是让模型替你决定职业，而是像调查一条线索一样：分清招聘项目与具体岗位，追到官网，记录冲突，再做判断。</p></div><div class="cover-side"><div class="brief"><span>线索池</span><strong>42</strong><em>+ 5 今日新增</em></div><div class="brief"><span>已证实</span><strong>11</strong><em>26% of leads</em></div><div class="brief"><span>可行动</span><strong>06</strong><em>上海 · 2027</em></div><div class="brief"><span>待调查</span><strong>08</strong><em>存在冲突</em></div></div></div>
+        <div class="board">
+          <section><span class="section-number">01 / INVESTIGATION ROUTE</span><h2>今天的核验路线</h2><div class="route"><div class="route-step active"><strong>飞书来源已同步</strong><span>7,910 条记录 · 5 新增 · 2 修改</span></div><div class="route-step active"><strong>隔离宽泛项目</strong><span>14 条 Campaign 不进入匹配</span></div><div class="route-step"><strong>核验 Top 20</strong><span>当前完成 11 / 20</span></div><div class="route-step"><strong>投递可信岗位</strong><span>今天目标 5 条</span></div></div></section>
+          <section><span class="section-number">02 / ACTIVE DOSSIERS</span><h2>正在调查的岗位档案</h2>
+            <article class="dossier"><div class="dossier-head"><span class="dossier-id">№001</span><h3>大模型 AI 产品实习生<span>星海智能 · Data AML</span></h3><span class="stamp">VERIFIED</span></div><div class="dossier-meta"><span>上海</span><span>2027届</span><span>2项简历证据</span><span>11小时前核验</span></div></article>
+            <article class="dossier"><div class="dossier-head"><span class="dossier-id">№002</span><h3>技术产品经理<span>同名科技 · 数据平台</span></h3><span class="stamp warn">CONFLICT</span></div><div class="dossier-meta"><span>上海</span><span>2027届</span><span>城市字段冲突</span><span>需回官网</span></div></article>
+            <article class="dossier"><div class="dossier-head"><span class="dossier-id">№003</span><h3>2027届产品类岗位<span>拓竹科技 · 校招总项目</span></h3><span class="stamp warn">CAMPAIGN</span></div><div class="dossier-meta"><span>多岗位</span><span>多城市</span><span>不参与匹配</span><span>等待具体JD</span></div></article>
+            <div class="clipping"><span class="clip-label">EVIDENCE CLIPPING / 简历原文</span><p>“负责智能船舶多源数据平台方案梳理，建立采集—标注—训练—评估的数据闭环……”</p></div>
+          </section>
+          <section><span class="section-number">03 / CASE №001</span><h2>为什么值得投</h2><div class="fact"><small>硬条件 / Eligibility</small><strong>明确通过</strong><p>上海、2027届、本科及以上、当前开放。</p></div><div class="fact"><small>能力证据 / Evidence</small><strong>有两项直接证据</strong><p>对应需求分析、数据治理与跨团队方案表达。</p></div><div class="fact"><small>信息可信 / Trust</small><strong>官网已经核验</strong><p>具体JD可访问；第三方表存在轻微历史差异。</p></div><button class="action">加入今天的投递清单 →</button></section>
+        </div>
+      </section>
+
+      <section class="concept spectrum" data-variant="D">
+        <div class="colorline"></div>
+        <header class="head"><div class="brandlock"><span class="brandmark">J</span><span>岗位证据台</span></div><nav><span class="active">今日决策</span><span>岗位记录</span><span>来源同步</span><span>核验队列</span><span>效果证据</span></nav><span class="head-status">● 飞书 09:32 已全量同步</span></header>
+        <div class="intro"><div class="intro-copy"><small>EVIDENCE → DECISION / SHANGHAI</small><h1>今天先确认 5 个<br />有证据、能行动的岗位。</h1><p>颜色不做装饰：蓝色代表官网事实，绿色代表资格通过，琥珀代表待核验，珊瑚代表冲突，紫色只属于个人简历证据。</p></div><div class="signals"><div class="signal-card" style="--signal:#4056d6"><span>官网已核验</span><strong>11</strong><em>事实证据</em></div><div class="signal-card" style="--signal:#168a83"><span>符合硬条件</span><strong>06</strong><em>可以行动</em></div><div class="signal-card" style="--signal:#e6a52d"><span>等待确认</span><strong>17</strong><em>信息未知</em></div><div class="signal-card" style="--signal:#df5f50"><span>字段冲突</span><strong>08</strong><em>不可静默覆盖</em></div></div></div>
+        <div class="canvas"><section class="records"><div class="record-toolbar"><h2>上海岗位记录</h2><button class="filter active">2027 届</button><button class="filter">具体岗位</button><button class="filter">官网在招</button><button class="filter">＋筛选</button><span class="count">42 RECORDS</span></div>
+          <div class="record-head"><span>编号</span><span>岗位 / 公司</span><span>资格</span><span>能力证据</span><span>信息状态</span><span></span></div>
+          <div class="record selected" style="--row:#4056d6"><div class="record-id">001</div><div class="record-role"><strong>大模型 AI 产品实习生</strong><span>星海智能 · Data AML · A110957</span></div><div><span class="lozenge" style="--tone:#168a83">明确通过</span></div><div><span class="lozenge" style="--tone:#8467c5">2项证据</span></div><div><span class="lozenge" style="--tone:#4056d6">官网在招</span></div><div class="record-arrow">→</div></div>
+          <div class="record" style="--row:#e6a52d"><div class="record-id">002</div><div class="record-role"><strong>AI 产品经理</strong><span>云深科技 · 企业服务 · J-2082</span></div><div><span class="lozenge" style="--tone:#e6a52d">待确认</span></div><div><span class="lozenge" style="--tone:#8467c5">3项证据</span></div><div><span class="lozenge" style="--tone:#4056d6">官网在招</span></div><div class="record-arrow">→</div></div>
+          <div class="record" style="--row:#df5f50"><div class="record-id">003</div><div class="record-role"><strong>技术产品经理</strong><span>同名科技 · 数据平台 · R-0308</span></div><div><span class="lozenge" style="--tone:#168a83">明确通过</span></div><div><span class="lozenge" style="--tone:#8467c5">2项证据</span></div><div><span class="lozenge" style="--tone:#df5f50">2项冲突</span></div><div class="record-arrow">→</div></div>
+          <div class="record" style="--row:#8b8a82"><div class="record-id">004</div><div class="record-role"><strong>2027届产品类岗位</strong><span>拓竹科技 · Campaign · 今日新增</span></div><div><span class="lozenge" style="--tone:#77766d">不判断</span></div><div><span class="lozenge" style="--tone:#77766d">不匹配</span></div><div><span class="lozenge" style="--tone:#e6a52d">待拆分</span></div><div class="record-arrow">→</div></div>
+        </section><aside class="casefile"><span class="case-kicker">CASE FILE / №001</span><h2>大模型 AI 产品实习生</h2><div class="case-company">星海智能 · Data AML · 上海</div><div class="triad"><div class="triad-row" style="--axis:#168a83"><i></i><small>ELIGIBILITY</small><strong>明确通过</strong><p>上海、2027届、本科及以上、当前开放。</p></div><div class="triad-row" style="--axis:#8467c5"><i></i><small>EVIDENCE FIT</small><strong>主要证据</strong><p>两段简历原文对应需求分析与数据治理。</p></div><div class="triad-row" style="--axis:#4056d6"><i></i><small>TRUST</small><strong>官网已核验</strong><p>具体JD当前可访问；11小时前完成核验。</p></div></div><div class="quotation"><small>RESUME EVIDENCE / 原文片段</small><p>“负责智能船舶多源数据平台方案梳理，建立采集—标注—训练—评估的数据闭环……”</p></div><div class="case-actions"><button>查看完整证据</button><button class="primary">加入投递清单</button></div></aside></div>
+      </section>
+
+      <section class="concept blocks" data-variant="X">
+        <header class="nav"><div class="identity"><span class="identity-mark">J</span><span>校招岗位决策台</span></div><nav class="navlinks"><span class="active">今日决策</span><span>岗位池</span><span>核验工作台</span><span>数据来源</span><span>可信短名单</span></nav><div class="profile"><span class="online"></span><span>飞书已同步 · 09:32</span></div></header>
+        <div class="mosaic"><section class="hero-block"><small>上海 · 2027届 · AI / 技术产品</small><div><h1>今天先确认 5 个<br />真正值得投的岗位。</h1><p>先把聚合表变成可信证据，再决定下一步。每一种颜色代表一类任务，而不只是装饰。</p></div><div class="hero-foot"><span>JOB INTELLIGENCE / EVIDENCE FIRST</span><button>打开今日清单 →</button></div></section><section class="metric-mosaic"><div class="metric-block" style="--fill:#bdebd6"><span>官网已核验</span><strong>11</strong><em>事实已经确认</em></div><div class="metric-block" style="--fill:#ffe783"><span>等待核验</span><strong>17</strong><em>需要继续调查</em></div><div class="metric-block" style="--fill:#b9dcff"><span>可以投递</span><strong>06</strong><em>满足明确门槛</em></div><div class="metric-block" style="--fill:#ffbcae"><span>字段冲突</span><strong>08</strong><em>不可直接采用</em></div></section></div>
+        <section class="mission"><div><small>TODAY'S MISSION / 01</small><strong>先核验剩余 9 个 Top 候选，再完成 5 次真实投递</strong></div><div class="progress-ring"><span>11 / 20</span><div class="bar"></div></div></section>
+        <div class="workboard"><section class="jobs-block"><header class="jobs-head"><h2>上海岗位池</h2><div class="tabs"><button class="active">具体岗位</button><button>资格未失败</button><button>官网在招</button></div><span class="total">42 RECORDS</span></header>
+          <div class="color-job" style="--rowfill:#e7e2ff"><div class="job-number">001</div><div class="job-name"><strong>大模型 AI 产品实习生</strong><span>星海智能 · Data AML · A110957</span></div><div><span class="plain-status" style="--dot:#33a977">明确通过</span></div><div><span class="plain-status" style="--dot:#6f54d9">2项证据</span></div><div><span class="plain-status" style="--dot:#4b93df">官网在招</span></div><div class="open-job">→</div></div>
+          <div class="color-job" style="--rowfill:#fffdf9"><div class="job-number">002</div><div class="job-name"><strong>AI 产品经理</strong><span>云深科技 · 企业服务 · J-2082</span></div><div><span class="plain-status" style="--dot:#ebb233">待确认</span></div><div><span class="plain-status" style="--dot:#6f54d9">3项证据</span></div><div><span class="plain-status" style="--dot:#4b93df">官网在招</span></div><div class="open-job">→</div></div>
+          <div class="color-job" style="--rowfill:#fff0ec"><div class="job-number">003</div><div class="job-name"><strong>技术产品经理</strong><span>同名科技 · 数据平台 · R-0308</span></div><div><span class="plain-status" style="--dot:#33a977">明确通过</span></div><div><span class="plain-status" style="--dot:#6f54d9">2项证据</span></div><div><span class="plain-status" style="--dot:#ec7563">2项冲突</span></div><div class="open-job">→</div></div>
+          <div class="color-job" style="--rowfill:#f1f0eb"><div class="job-number">004</div><div class="job-name"><strong>2027届产品类岗位</strong><span>拓竹科技 · Campaign · 今日新增</span></div><div><span class="plain-status" style="--dot:#98958d">不判断</span></div><div><span class="plain-status" style="--dot:#98958d">不匹配</span></div><div><span class="plain-status" style="--dot:#ebb233">待拆分</span></div><div class="open-job">→</div></div>
+        </section><aside class="evidence-column"><section class="case-title"><small>CASE FILE / №001</small><h2>大模型 AI 产品实习生</h2><p>星海智能 · Data AML · 上海</p></section><div class="axis-mosaic"><section class="axis-block" style="--fill:#bdebd6"><small>ELIGIBILITY</small><strong>明确通过</strong><p>上海、2027届、本科及以上，当前开放。</p></section><section class="axis-block" style="--fill:#e0d7ff"><small>EVIDENCE FIT</small><strong>主要证据</strong><p>两段原文对应需求分析与数据治理。</p></section><section class="axis-block wide" style="--fill:#b9dcff"><small>TRUST / OFFICIAL</small><strong>官网已经核验</strong><p>具体JD当前可访问；11小时前完成核验，未发现影响投递的关键冲突。</p></section></div><section class="source-note"><strong>来源中仍有历史差异</strong><p>供应商B曾写“上海/杭州”，官网当前仅显示上海。原始说法保留，但不覆盖当前事实。</p></section></aside></div>
+      </section>
+
+      <section class="concept relaxed" data-variant="E">
+        <header class="r-nav"><div class="r-brand"><span class="r-mark">J</span><span>校招岗位决策台</span></div><nav class="r-links"><span class="active">今日决策</span><span>岗位池</span><span>核验工作台</span><span>数据来源</span></nav><span class="r-sync">● 飞书 09:32 已同步</span></header>
+        <main class="r-shell"><section class="r-hero"><div class="r-hero-main"><div><span class="r-kicker">EVIDENCE FIRST / SHANGHAI</span><h1>少找一点。<br />先确认真正能投的岗位。</h1><p>把供应商线索、官网事实和个人证据整理清楚。页面只突出今天需要完成的任务，其余信息在需要时展开。</p></div><div class="r-hero-foot"><span>2027届 · AI / 技术产品</span><button>开始今日核验 →</button></div></div><aside class="r-summary"><div><small>今天的可信投递目标</small><strong>5</strong><p>只有具体岗位、硬条件通过且官网仍在招，才会进入清单。</p></div><div class="r-summary-list"><div class="r-summary-row"><span>已经确认</span><b>2 / 5</b></div><div class="r-summary-row"><span>等待核验</span><b>9 个</b></div><div class="r-summary-row"><span>字段冲突</span><b>3 个</b></div></div></aside></section>
+          <section class="r-mission"><div class="r-mission-copy"><small>TODAY'S FOCUS</small><strong>先完成 Top 候选的官网核验，再开始投递</strong></div><div class="r-progress"><div class="r-progress-label"><span>核验进度</span><b>11 / 20</b></div><div class="r-progress-track"><span></span></div></div></section>
+          <header class="r-section-head"><div><small>SHORTLIST / TODAY</small><h2>今天值得继续看的岗位</h2></div><a href="#">查看完整岗位池 →</a></header>
+          <div class="r-work"><section class="r-list"><article class="r-job selected"><div class="r-job-title"><span class="r-job-index">01</span><div><h3>大模型 AI 产品实习生</h3><p>星海智能 · Data AML · 上海 · 11小时前核验</p></div></div><div class="r-job-signals"><span class="r-tag" style="--tone:#308064">符合条件</span><span class="r-tag" style="--tone:#6c58c4">2项证据</span><span class="r-tag" style="--tone:#4f78ba">官网在招</span><button class="r-open">→</button></div></article><article class="r-job"><div class="r-job-title"><span class="r-job-index">02</span><div><h3>AI 产品经理</h3><p>云深科技 · 企业服务 · 上海 · 1天前核验</p></div></div><div class="r-job-signals"><span class="r-tag" style="--tone:#a67715">待确认</span><span class="r-tag" style="--tone:#6c58c4">3项证据</span><button class="r-open">→</button></div></article><article class="r-job"><div class="r-job-title"><span class="r-job-index">03</span><div><h3>技术产品经理</h3><p>同名科技 · 数据平台 · 城市字段存在冲突</p></div></div><div class="r-job-signals"><span class="r-tag" style="--tone:#bd594b">需要核验</span><button class="r-open">→</button></div></article></section>
+            <aside><section class="r-evidence"><div class="r-evidence-head"><small>CASE FILE / №01</small><h2>为什么它值得投</h2><p>大模型 AI 产品实习生 · 星海智能</p></div><div class="r-axis-list"><div class="r-axis"><small>ELIGIBILITY</small><div><strong>明确通过</strong><p>上海、2027届、本科及以上。</p></div></div><div class="r-axis"><small>EVIDENCE</small><div><strong>两项主要证据</strong><p>对应需求分析与数据治理。</p></div></div><div class="r-axis"><small>TRUST</small><div><strong>官网已核验</strong><p>具体岗位当前仍可访问。</p></div></div></div></section><section class="r-quote"><small>RESUME EVIDENCE</small><p>“负责智能船舶多源数据平台方案梳理，建立采集—标注—训练—评估的数据闭环……”</p></section></aside></div>
+        </main>
+      </section>
+    </main>
+
+    <div class="prototype-switcher" role="navigation" aria-label="原型方向切换">
+      <button id="previous" aria-label="上一个方向">←</button>
+      <div class="label" id="variant-label"></div>
+      <button id="next" aria-label="下一个方向">→</button>
+    </div>
+    <div class="prototype-note">THROWAWAY PROTOTYPE · ← / → 切换</div>
+    <script>
+      const variants = [
+        { key: "A", name: "证据公报 / Evidence Ledger" },
+        { key: "B", name: "数据工作台 / Data Workbench" },
+        { key: "C", name: "求职调查手册 / Field Journal" },
+        { key: "D", name: "多彩证据台 / Evidence Spectrum" },
+        { key: "E", name: "松弛色域 / Relaxed Color Fields" },
+      ];
+      const params = new URLSearchParams(location.search);
+      let current = Math.max(0, variants.findIndex((item) => item.key === (params.get("variant") || "A").toUpperCase()));
+      if (current < 0) current = 0;
+      function render() {
+        document.querySelectorAll(".concept").forEach((node) => node.classList.toggle("active", node.dataset.variant === variants[current].key));
+        document.getElementById("variant-label").textContent = `${variants[current].key} — ${variants[current].name}`;
+        const nextUrl = new URL(location.href); nextUrl.searchParams.set("variant", variants[current].key); history.replaceState({}, "", nextUrl);
+      }
+      function move(delta) { current = (current + delta + variants.length) % variants.length; render(); }
+      document.getElementById("previous").addEventListener("click", () => move(-1));
+      document.getElementById("next").addEventListener("click", () => move(1));
+      document.addEventListener("keydown", (event) => {
+        if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
+        if (event.key === "ArrowLeft") move(-1);
+        if (event.key === "ArrowRight") move(1);
+      });
+      render();
+    </script>
+  </body>
+</html>
