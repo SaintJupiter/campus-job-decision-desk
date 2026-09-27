@@ -209,13 +209,13 @@ describe("App", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /多份校招表.*先核验，再决定/u }),
+      screen.getByRole("heading", { name: /不只找岗位.*看清为什么适合你/u }),
     ).toBeInTheDocument();
-    expect(screen.getByText("区分招聘项目与具体岗位")).toBeInTheDocument();
-    expect(screen.getByText(/可追溯的投递判断/u)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "开始规划投递" })).toHaveAttribute(
+    expect(screen.getByText("一句“适合”，不足以决策")).toBeInTheDocument();
+    expect(screen.getByText(/检索找线索，模型判关系/u)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /体验岗位筛选/u })).toHaveAttribute(
       "href",
-      "/dashboard",
+      "/jobs",
     );
   });
 
